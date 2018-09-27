@@ -1,0 +1,16 @@
+/bin/
+/build/
+/war/
+/.classpath
+/.project
+/feerel.mv.db
+/feerel.trace.db
+/.java-version
+/feerel.log
+/feerel_2018-04-21.log
+/feerel_2018-04-23.log
+/feerel_2018-04-24.log
+/feerel_2018-04-25.log
+/feerel_2018-04-26.log
+/logs/
+/fiets.mv.db

@@ -1,0 +1,54 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 60px;
+}
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  line-height: 60px;
+  background: white;
+  border-top: 1px solid #eee;
+  z-index: 20;
+}
+
+.post, .feed {
+  position: relative;
+}
+.feed-actions {
+  float: right;
+}
+.post-actions {
+  float: right;
+}
+
+@media (min-width: 576px) {
+  .post-actions {
+    visibility: hidden;
+  }
+}
+
+.post:hover .post-actions {
+  visibility: visible;
+}
+
+.post h3 {
+  font-size: 1.1rem;
+}
+.post.bookmarked .add-bookmark-link, .post:not(.bookmarked) .remove-bookmark-link {
+  display: none;
+}
+
+.list-group-item.post.bookmarked {
+  border: 1px solid black;
+  z-index: 1;
+}
+
+.nav-item.active {
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 5px;
+}

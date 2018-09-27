@@ -1,0 +1,199 @@
+<project name="fiets" default="build">
+  <property file="${user.home}/.ant.properties"/>
+
+  <property name="project.java.version" value="1.8"/>
+  <property name="lib.dir" value="build/lib"/>
+  <property name="build.lib.dir" value="build/devlib"/>
+
+  <path id="project.classpath">
+    <pathelement path="build/classes" />
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${build.lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="init">
+    <property name="ant.lib.dir" location="build/ant"/>
+    <mkdir dir="${ant.lib.dir}"/>
+    <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar"
+      dest="${ant.lib.dir}" />
+    <path id="ant.classpath">
+      <fileset dir="${ant.lib.dir}" includes="*.jar" />
+      <fileset dir="${ant.library.dir}" includes="*.jar" />
+    </path>
+
+    <taskdef name="ivy-retrieve" classname="org.apache.ivy.ant.IvyRetrieve"
+      classpathref="ant.classpath"/>
+    <taskdef name="ivy-info" classname="org.apache.ivy.ant.IvyInfo"
+      classpathref="ant.classpath"/>
+    <ivy-info/>
+    <property name="project.name" value="${ivy.module}"/>
+    <property name="project.version" value="${ivy.revision}"/>
+  </target>
+
+  <target name="resolve" depends="ivy">
+    <mkdir dir="build/assets"/>
+    <get dest="build/assets/bootstrap.min.css"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"/>
+    <get dest="build/assets/bootstrap.min.css.map"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css.map"/>
+    <get dest="build/assets/bootstrap.min.js"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"/>
+    <get dest="build/assets/bootstrap.min.js.map"
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js.map"/>
+    <get dest="build/assets/jquery.js"
+      src="http://code.jquery.com/jquery-1.12.4.js"/>
+    <unzip dest="build/spotbugs">
+      <fileset dir="build/devlib" includes="spotbugs*.zip"/>
+      <cutdirsmapper dirs="1"/>
+    </unzip>
+  </target>
+
+  <target name="bugs" depends="init">
+    <taskdef onError="fail"
+      resource="edu/umd/cs/findbugs/anttask/tasks.properties"
+      classpath="build/spotbugs/lib/spotbugs-ant.jar" />
+    <local name="spotbugs.warnings"/>
+    <spotbugs home="build/spotbugs"
+              output="xml"
+              outputFile="build/spotbugs.xml"
+              reportLevel="low"
+              effort="max"
+              failonerror="true"
+              warningsproperty="spotbugs.warnings">
+      <auxClasspath refid="project.classpath"/>
+      <sourcePath path="src"/>
+      <class location="build/classes"/>
+    </spotbugs>
+    <fail>
+      <condition><istrue value="${spotbugs.warnings}"/></condition>
+      SpotBugs found some errors, see build/spotbugs.xml.
+    </fail>
+  </target>
+
+  <target name="run" depends="build-no-resolve">
+    <java fork="true" jar="build/result/${project.name}-${project.version}.jar"/>
+  </target>
+
+  <target name="build" depends="resolve,build-no-resolve,copy-files"/>
+  <target name="build-no-resolve" depends="init">
+    <do-javac src="src" dest="build/classes" />
+    <do-copy-resources />
+    <mkdir dir="build/classes/META-INF/resources/static"/>
+    <copy todir="build/classes/META-INF/resources/static" overwrite="true">
+      <fileset dir="build/assets"/>
+      <fileset dir="static"/>
+    </copy>
+    <mkdir dir="build/result"/>
+    <jar jarfile="build/result/${project.name}-${project.version}.jar" basedir="build/classes">
+      <manifest>
+        <attribute name="Main-Class" value="fiets.Server" />
+      </manifest>
+      <zipfileset src="build/dependencies-all.jar"
+                                excludes="META-INF/*.SF" />
+    </jar>
+  </target>
+  <target name="copy-files">
+    <mkdir dir="build/result"/>
+    <copy todir="build/result" overwrite="true">
+      <fileset dir="." includes="*.sh"/>
+    </copy>
+  </target>
+
+  <target name="build-test" depends="resolve,build-test-no-resolve"/>
+  <target name="build-test-no-resolve" depends="init">
+    <do-javac src="test/src" dest="build/test/classes"/>
+  </target>
+
+  <target name="test" depends="build-test-no-resolve">
+    <do-junit src="test/src" classpathref="project.classpath"/> 
+  </target>
+
+  <target name="ivy" depends="init">
+    <mkdir dir="${lib.dir}"/>
+    <ivy-retrieve conf="default" sync="true"
+      pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]" />
+    <mkdir dir="${build.lib.dir}"/>
+    <ivy-retrieve conf="build" sync="true"
+      pattern="${build.lib.dir}/[artifact]-[revision](-[classifier]).[ext]" />
+    <mkdir dir="build/" />
+    <jar jarfile="build/dependencies-all.jar">
+      <zipgroupfileset dir="${lib.dir}">
+        <include name="**/*.jar" />
+      </zipgroupfileset>
+    </jar>
+  </target>
+
+  <macrodef name="do-junit">
+    <attribute name="src"/>
+    <attribute name="classpathref"/>
+    <attribute name="reportdir" default="build/junit-report"/>
+    <sequential>
+      <delete dir="@{reportdir}"/>
+      <mkdir dir="@{reportdir}"/>
+      <junit printsummary="no" haltonfailure="no"
+             fork="yes" forkmode="perBatch"
+             failureProperty="test.failure">
+        <classpath refid="@{classpathref}" />
+        <formatter type="xml" usefile="true" />
+        <formatter type="brief" usefile="false" />
+        <batchtest fork="yes" todir="@{reportdir}">
+          <fileset dir="@{src}" includes="**/*Test.java"/>
+        </batchtest>
+      </junit>
+      <fail if="test.failure" message="Unit test(s) failed."/>
+     </sequential>
+  </macrodef>
+
+  <macrodef name="do-javac">
+    <attribute name="src"/>
+    <attribute name="dest"/>
+    <sequential>
+      <mkdir dir="@{dest}" />
+
+      <javac srcdir="@{src}"
+             source="${project.java.version}"
+             target="${project.java.version}"
+             destdir="@{dest}"
+             classpathref="project.classpath"
+             debug="true"
+             debuglevel="vars,lines,source"
+             includeAntRuntime="false"
+             encoding="UTF-8" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="do-copy-resources">
+    <sequential>
+      <copy todir="build/classes">
+        <fileset dir="src" excludes="**/*.java,**/*~" />
+      </copy>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="do-manifest">
+    <sequential>
+      <mkdir dir="build" />
+      <tstamp>
+        <format property="time.now" pattern="yyyyMMdd" />
+      </tstamp>
+      <pathconvert pathsep=" "
+                   property="mainjar.classpath"
+                   refid="project.classpath">
+        <map from="${basedir}/lib" to="lib" />
+      </pathconvert>
+
+      <manifest file="build/MANIFEST.MF" mode="replace">
+        <attribute name="Copyright" value="(C) Andreas Siemer" />
+        <attribute name="Project-Name" value="${project.name}" />
+        <attribute name="Project-Version" value="${project.version}" />
+        <attribute name="Packaging-Date" value="${time.now}" />
+        <attribute name="Class-Path" value="${mainjar.classpath}" />
+      </manifest>
+    </sequential>
+  </macrodef>
+
+</project>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+  <settings defaultResolver="central" />
+  <resolvers>
+    <ibiblio name="central" m2compatible="true" />
+  </resolvers>
+  <statuses default="release">
+    <status name="release" integration="true"/>
+  </statuses>
+  <caches defaultCacheDir="${basedir}/build/ivy/cache">
+  </caches>
+</ivysettings>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+
+  <info organisation="ondy" module="fiets" revision="0.9">
+    <ivyauthor name="Andreas Siemer" />
+  </info>
+
+  <configurations defaultconfmapping="*->default">
+    <conf name="default"/>
+    <conf name="build" visibility="private"/>
+  </configurations>
+
+  <dependencies defaultconf="default">
+    <dependency org="org.apache.logging.log4j" name="log4j-core" rev="[2,3["/>
+    <dependency org="org.apache.logging.log4j" name="log4j-api" rev="[2,3["/>
+    <dependency org="org.jodd" name="jodd-lagarto" rev="[4,5["/>
+    <dependency org="org.jodd" name="jodd-http" rev="[4,5["/>
+    <dependency org="org.jodd" name="jodd-json" rev="[4,5["/>
+    <dependency org="com.h2database" name="h2" rev="[1.4,1.5["/>
+    <dependency org="org.nanohttpd" name="nanohttpd" rev="[2,3["/>
+    <dependency org="org.jsoup" name="jsoup" rev="[1,2["/>
+    <dependency org="org.twitter4j" name="twitter4j-core" rev="[4,5[" />
+    <dependency org="com.syncthemall" name="boilerpipe" rev="[1.2,1.3["/>
+
+    <dependency org="junit" name="junit" rev="[4,5[" conf="build"/>
+    <dependency org="com.github.spotbugs" name="spotbugs-annotations" rev="[3.1,4[" conf="build"/>
+    <dependency org="com.github.spotbugs" name="spotbugs" rev="[3.1,4[" conf="build" transitive="false">
+      <artifact name="spotbugs" type="zip" />
+    </dependency>
+    <dependency org="com.jcraft" name="jsch" rev="0.1.54" conf="build"/>
+  </dependencies>
+
+</ivy-module>
