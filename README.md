@@ -48,7 +48,7 @@ there is no form to add feeds, yet.
 
 You can add feeds manually by calling the URL:
 
-    http://<host>:<port>/add-feed/?url=<feed-url>
+    http://<host>:<port>/add-feed?url=<feed-url>
 
 * `<feed-url>` has to point to a supported feed format.
 * `<feed-url>` must be URL encoded. If you call add-feed from a browser, 
