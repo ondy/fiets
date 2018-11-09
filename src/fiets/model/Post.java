@@ -15,7 +15,7 @@ public class Post implements HasId {
     String theSnippet, boolean theRead, Feed theFeed) {
     id = theId;
     location = theLocation;
-    date = (Date) theDate.clone();
+    date = theDate == null ? null : (Date) theDate.clone();
     title = theTitle;
     snippet = theSnippet;
     read = theRead;
