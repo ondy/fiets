@@ -64,4 +64,14 @@ public class Database implements AutoCloseable {
     }
     return new Timestamp(date.getTime());
   }
+
+  public void createIndexIfNotExists(
+    String table, String column) throws SQLException {
+    try (PreparedStatement ps = conn.prepareStatement(
+      String.format("CREATE INDEX IF NOT EXISTS %s_%s_idx ON %s(%s);",
+        table, column, table, column))) {
+      ps.executeUpdate();
+    }
+  }
+
 }

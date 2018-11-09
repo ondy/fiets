@@ -26,6 +26,7 @@ public class FeedDao {
   public FeedDao(Database theDb) throws SQLException {
     db = theDb;
     createTable();
+    createIndexes();
   }
 
   private int createTable() throws SQLException {
@@ -39,6 +40,15 @@ public class FeedDao {
       + ");")) {
       return ps.executeUpdate();
     }
+  }
+
+  private void createIndex(String column) throws SQLException {
+    db.createIndexIfNotExists("feed", column);
+  }
+
+  private void createIndexes() throws SQLException {
+    createIndex("id");
+    createIndex("location");
   }
 
   public Feed saveFeed(Feed feed) throws SQLException {
@@ -124,7 +134,7 @@ public class FeedDao {
       ps.setString(4, feed.getLastStatus());
       ps.executeUpdate();
       feed = new Feed(Database.getGeneratedKey(ps),
-        feed.getLocation(), feed.getTitle(), feed.getLastAccess(), 
+        feed.getLocation(), feed.getTitle(), feed.getLastAccess(),
         feed.getLastStatus());
     }
     log.debug("Inserted feed {} with ID {}", feed.getLocation(), feed.getId());

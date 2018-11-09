@@ -34,6 +34,7 @@ public class PostDao {
   public PostDao(Database theDb) throws SQLException {
     db = theDb;
     createTables();
+    createIndexes();
     upgradeTables();
   }
 
@@ -45,6 +46,17 @@ public class PostDao {
     createPostTable();
     createPostFeedTable();
     createBookmarkTable();
+  }
+
+  private void createIndex(String column) throws SQLException {
+    db.createIndexIfNotExists("post", column);
+  }
+
+  private void createIndexes() throws SQLException {
+    createIndex("id");
+    createIndex("date");
+    createIndex("read");
+    createIndex("location");
   }
 
   public Post savePost(Post post, Feed feed) throws SQLException {
