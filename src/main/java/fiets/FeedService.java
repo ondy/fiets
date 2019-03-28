@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.xml.sax.SAXParseException;
 
 import fiets.db.Database;
@@ -75,6 +76,18 @@ public class FeedService {
         log.error("Could not update posts for {}.", feed.getLocation(), e);
       }
     }
+  }
+  
+  public static void main(String[] args) throws Exception {
+    Process.parsePosts(
+      new Feed("https://www.stepstone.de/5/ergebnisliste.html?ke=it%20AND%20leiter&ws=59071%20Hamm&ra=50&ob=refdate", null, null),
+      new RawPostFilter() {
+        
+        @Override public boolean isAllowed(Feed feed, Object rawPost) {
+          // TODO Auto-generated method stub
+          return true;
+        }
+      });
   }
 
   public Set<Long> getBookmarks() throws SQLException {

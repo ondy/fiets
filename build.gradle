@@ -1,0 +1,66 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+sourceSets {
+  main {
+    resources {
+      srcDirs = ["src/main/resources"]
+      includes = ["**/*.html","**/*.xml"]
+    }
+  }
+}
+
+task downloadAssets {
+  doLast {
+    def bootstrap = 'https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1'
+    ant.mkdir(dir: "build/assets")
+    ant.get(dest: "build/assets/bootstrap.min.css",
+      src: "${bootstrap}/css/bootstrap.min.css")
+    ant.get(dest: "build/assets/bootstrap.min.css.map",
+      src: "${bootstrap}/css/bootstrap.min.css.map")
+    ant.get(dest: "build/assets/bootstrap.min.js",
+      src: "${bootstrap}/js/bootstrap.min.js")
+    ant.get(dest: "build/assets/bootstrap.min.js.map",
+      src: "${bootstrap}/js/bootstrap.min.js.map")
+    ant.get(dest: "build/assets/jquery.js",
+      src: "http://code.jquery.com/jquery-1.12.4.js")
+  }
+}
+assemble.dependsOn downloadAssets
+
+jar {
+  baseName = 'fiets'
+  version =  '0.10.0'
+  manifest {
+    attributes "Main-Class": "fiets.Server"
+  }
+
+  from {
+    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  from('build/assets') {
+    into 'META-INF/resources/static'
+  }
+  from('src/main/resources/static') {
+    into 'META-INF/resources/static'
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+  compile "org.apache.logging.log4j:log4j-core:[2,3["
+  compile "org.apache.logging.log4j:log4j-api:[2,3["
+  compile "org.jodd:jodd-lagarto:[4,5["
+  compile "org.jodd:jodd-http:[4,5["
+  compile "org.jodd:jodd-json:[4,5["
+  compile "com.h2database:h2:[1.4,1.5["
+  compile "org.nanohttpd:nanohttpd:[2,3["
+  compile "org.jsoup:jsoup:[1,2["
+  compile "org.twitter4j:twitter4j-core:[4,5["
+  compile "com.syncthemall:boilerpipe:[1.2,1.3["
+}
