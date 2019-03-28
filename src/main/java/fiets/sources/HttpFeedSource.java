@@ -22,6 +22,8 @@ public class HttpFeedSource implements FeedSource {
   
   @Override public String process(Feed feed) {
     HttpResponse rsp = HttpRequest.get(feed.getLocation())
+      .timeout(10000)
+      .connectionTimeout(10000)
       .trustAllCerts(true)
       .followRedirects(true)
       .send();
