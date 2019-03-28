@@ -31,7 +31,10 @@ jar {
   baseName = 'fiets'
   version =  '0.10.0'
   manifest {
-    attributes "Main-Class": "fiets.Server"
+    attributes(
+      "Main-Class": "fiets.Server",
+      "Multi-Release": "true"
+    )
   }
 
   from {
