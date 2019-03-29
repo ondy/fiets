@@ -1,5 +1,6 @@
 package fiets.db;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,7 +22,8 @@ public class Database implements AutoCloseable {
    * Constructor. Initializes the internal connection singleton.
    */
   public Database() throws SQLException {
-    conn = DriverManager.getConnection("jdbc:h2:./fiets", "sa", "");
+    new File("db").mkdir();
+    conn = DriverManager.getConnection("jdbc:h2:./db/fiets", "sa", "");
   }
 
   /**
