@@ -24,6 +24,8 @@ import fiets.display.PostDisplayProvider;
 import fiets.filter.DefaultRawPostFilter;
 import fiets.filter.RawPostFilter;
 import fiets.model.Post;
+import fiets.processors.FeedProcessor;
+import fiets.processors.Process;
 import fiets.views.View;
 import jodd.json.JsonObject;
 
@@ -52,8 +54,25 @@ public class Server extends NanoHTTPD {
     initFietsProperties();
     PostDisplayProvider pdp = initPostDisplayProvider();
     RawPostFilter filter = initRawPostFilter();
+    initAdditionalProcessors();
     Server srv = new Server(port, pdp, filter);
     srv.init();
+  }
+
+  private static void initAdditionalProcessors() {
+    String processors = System.getProperty("processors");
+    try {
+      if (processors != null) {
+        for (String processor : processors.split(",")) {
+          Process.registerProcessor(
+            (FeedProcessor) Class.forName(processor).newInstance());
+        }
+      }
+    } catch (InstantiationException | IllegalAccessException
+        | ClassNotFoundException e) {
+      log.error("Could not register processors '{}'.", processors, e);
+      throw new IllegalArgumentException("Could not register processors", e);
+    }
   }
 
   private static RawPostFilter initRawPostFilter()

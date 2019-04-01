@@ -64,4 +64,8 @@ public class Process {
   private void register(FeedProcessor processor) {
     processors.add(processor);
   }
+
+  public static void registerProcessor(FeedProcessor processor) {
+     PROCESS.register(processor);
+  }
 }
