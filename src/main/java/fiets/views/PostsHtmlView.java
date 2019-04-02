@@ -136,11 +136,11 @@ public class PostsHtmlView implements View<String> {
   private String header() {
     if (unreadCount > 0) {
       return Pages.headerTemplate(pageName, String.format(
-        "%d of %d posts - Feerel", posts.size(), unreadCount),
+        "%d of %d posts - Fiets", posts.size(), unreadCount),
         unreadCount, bookmarked.size());
     } else {
       return Pages.headerTemplate(pageName,
-        String.format("%d posts - Feerel", posts.size()),
+        String.format("%d posts - Fiets", posts.size()),
         unreadCount, bookmarked.size());
     }
   }
