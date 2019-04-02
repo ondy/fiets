@@ -138,7 +138,7 @@ public class PostDao {
 
   public void deletePostsOfFeed(long feedId) throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "DELETE FROM post WHERE postfeed.feed=?"
+      "DELETE FROM post WHERE postfeed.feed=? "
           + "LEFT JOIN postfeed ON post.id=postfeed.post")) {
       ps.setLong(1, feedId);
       ps.executeUpdate();
