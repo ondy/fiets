@@ -26,7 +26,8 @@ public class PostDao {
 
   private static final String OUTDATED_SPEC =
     " WHERE post.read = true AND "
-    + "post.lastaccess <= DATEADD('month', -1, current_timestamp())";
+    + "post.lastaccess <= DATEADD('month', -1, current_timestamp()) AND "
+    + "post.id NOT IN (SELECT bookmarkedpost.post FROM bookmarkedpost)";
   private static final Logger log = LogManager.getLogger();
 
   private Database db;
