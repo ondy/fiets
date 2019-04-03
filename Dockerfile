@@ -1,3 +1,14 @@
+FROM gradle:5.3
+WORKDIR /src
+
+USER root
+RUN chown -R gradle:gradle /src
+USER gradle
+
+RUN git clone https://github.com/ondy/fiets ;\ 
+  cd fiets ;\
+  gradle build
+
 FROM adoptopenjdk/openjdk8:alpine-jre
 
 ENV FIETS_HOME /usr/local/fiets
@@ -9,12 +20,7 @@ RUN mkdir -p "$FIETS_HOME"; \
 USER fiets-user
 WORKDIR $FIETS_HOME
 
-ENV FIETS_VERSION 0.10
-ENV FIETS_URL https://github.com/ondy/fiets/releases/download/v$FIETS_VERSION/fiets-$FIETS_VERSION.0.jar
-ENV FIETS_SHA512 04f58bd98d6fd28e6e3a9f70b765118d0a4441a08a23b1c3c86fbe8fba5e5804b4817f8a451e9e63a03dc3414dc930c515faa016d73ff4b821d4f6dd5cda86d7
-
-RUN wget -O fiets.jar "$FIETS_URL";\
-  echo "$FIETS_SHA512 *fiets.jar" | sha512sum -c
+COPY --from=0 --chown=fiets-user:fiets-user /src/fiets/build/libs/fiets-*.jar fiets.jar
 
 EXPOSE 7000
 CMD ["java", "-jar", "fiets.jar"]
