@@ -112,6 +112,7 @@ public class Server extends NanoHTTPD {
         try {
           r.run();
         } catch (Throwable t) {
+          
           log.error(
             "Could not complete scheduled task: {}", t.getMessage(), t);
         }

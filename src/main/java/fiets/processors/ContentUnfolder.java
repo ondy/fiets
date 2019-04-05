@@ -14,6 +14,13 @@ public class ContentUnfolder {
   private static final Logger log = LogManager.getLogger();
 
   public String unfoldUrls(String snippet, String urlPrefix) {
+    return unfoldUrls(snippet, urlPrefix, 0);
+  }
+
+  private String unfoldUrls(String snippet, String urlPrefix, int depth) {
+    if (depth >= 10) {
+      return snippet;
+    }
     int urlPos = snippet.indexOf(urlPrefix);
     if (urlPos < 0) {
       return snippet;
