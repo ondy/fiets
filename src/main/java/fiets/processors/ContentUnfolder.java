@@ -37,7 +37,8 @@ public class ContentUnfolder {
     String prefix = snippet.substring(0, urlPos);
     String suffix = snippet.substring(urlEnd);
     log.debug("Unfolded twitter URL %s.", url);
-    return unfoldUrls(String.format("%s %s %s", prefix, text, suffix), urlPrefix);
+    return unfoldUrls(
+      String.format("%s %s %s", prefix, text, suffix), urlPrefix, depth+1);
   }
 
   private String loadUrlContent(String url) {
