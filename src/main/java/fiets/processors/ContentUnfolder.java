@@ -22,6 +22,9 @@ public class ContentUnfolder {
     if (urlEnd < 0) {
       urlEnd = snippet.length();
     }
+    if (urlPos == 0 && urlEnd == snippet.length()) {
+      return snippet;
+    }
     String url = snippet.substring(urlPos, urlEnd);
     String text = loadUrlContent(url);
     String prefix = snippet.substring(0, urlPos);
