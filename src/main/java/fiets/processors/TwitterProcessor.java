@@ -17,7 +17,8 @@ import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
-import twitter4j.auth.AccessToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class TwitterProcessor implements FeedProcessor {
 
@@ -36,9 +37,15 @@ public class TwitterProcessor implements FeedProcessor {
       String consumerSecret = qs.get("consumerSecret").get(0);
       String token = qs.get("token").get(0);
       String tokenSecret = qs.get("tokenSecret").get(0);
-      Twitter t = new TwitterFactory().getInstance();
-      t.setOAuthConsumer(consumerKey, consumerSecret);
-      t.setOAuthAccessToken(new AccessToken(token, tokenSecret));
+      Configuration conf = new ConfigurationBuilder()
+        .setOAuthAccessToken(token)
+        .setOAuthAccessTokenSecret(tokenSecret)
+        .setOAuthConsumerKey(consumerKey)
+        .setOAuthConsumerSecret(consumerSecret)
+        .setHttpConnectionTimeout(5000)
+        .setHttpReadTimeout(5000)
+        .setTweetModeExtended(true).build();
+      Twitter t = new TwitterFactory(conf).getInstance();
       return t;
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("UTF-8 not supported.", e);
