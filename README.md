@@ -54,6 +54,21 @@ You can add feeds manually by calling the URL:
 * `<feed-url>` must be URL encoded. If you call add-feed from a browser, 
 it should be just fine.
 
+#### Add Twitter Timeline
+Fiets is able to embed your Twitter timeline as a feed. For this, you need to
+register your fiets instance as an app in your Twitter account (you probably
+need to apply for a developer account first).
+
+Then you need the OAuth token+secret as well as consumer key+secret from your
+registered app and create the artificial URL:
+
+    twitter://?consumerKey=<consumer-key>&comsumerSecret=<consumer-secret>&token=<token>&tokenSecret=<token-secret>
+
+Register this URL as feed and you are done.
+
+Note: Do not give away this URL as it provides full access to your Twitter
+account.
+
 ### From Source 
 If you prefer to build from the current source:
 
