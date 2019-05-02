@@ -55,6 +55,8 @@ public class ContentUnfolder {
         url = appendParam(url, "_fb_noscript=1");
       }
       HttpResponse rsp = HttpRequest.get(url)
+        .timeout(10000)
+        .connectionTimeout(10000)
         .trustAllCerts(true)
         .send();
       if (rsp.statusCode() == HttpStatus.HTTP_MOVED_PERMANENTLY) {
