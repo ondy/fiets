@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,15 +142,15 @@ public class FeedDao {
     return feed;
   }
 
-  public Feed getFeed(long id) throws SQLException {
+  public Optional<Feed> getFeed(long id) throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
       "SELECT id,location,title,lastAccess,lastStatus FROM feed WHERE id=?")) {
       ps.setLong(1, id);
       ResultSet rs = ps.executeQuery();
       if (rs.next()) {
-        return parseFeedResultSet(rs);
+        return Optional.of(parseFeedResultSet(rs));
       } else {
-        throw new IllegalArgumentException("Feed not found with ID " + id);
+        return Optional.empty();
       }
     }
   }
@@ -221,7 +222,7 @@ public class FeedDao {
   }
 
   public void deleteFeed(long id) throws SQLException {
-    Feed f = getFeed(id);
+    Feed f = getFeed(id).get();
     Connection conn = db.getConnection();
     try (PreparedStatement ps = conn.prepareStatement(
       "DELETE FROM feed WHERE id=?")) {

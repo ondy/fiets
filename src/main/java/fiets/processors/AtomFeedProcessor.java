@@ -16,7 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import fiets.filter.RawPostFilter;
+import fiets.Filterer;
 import fiets.model.Feed;
 import fiets.model.Post;
 import fiets.processors.xml.Dom;
@@ -45,11 +45,11 @@ public class AtomFeedProcessor implements FeedProcessor {
     throws SAXException, IOException,
     ParserConfigurationException, XPathExpressionException {
     Document doc = Dom.parse(content);
-    return Xpath.xpathAsString(doc, "/feed/title");
+    return Xpath.xpathAsString(doc, "/feed/title").orElse("-no title-");
   }
 
   @Override public List<Post> parsePosts(
-    Feed feed, String content, RawPostFilter filter)
+    Feed feed, String content, Filterer ff)
     throws XPathExpressionException, SAXException,
       IOException, ParserConfigurationException, ParseException {
     Document doc = Dom.parse(content);
@@ -59,19 +59,15 @@ public class AtomFeedProcessor implements FeedProcessor {
     if (num > 0) {
       for (int i = 0; i < num; i++) {
         Node item = items.item(i);
-        if (filter.isAllowed(feed, item)) {
-          String title = Xpath.xpathAsString(item, "title");
-          String link = Xpath.xpathAsString(item, "link/@href");
-          String description = Xpath.xpathAsString(item, "content");
-          String dateString = Xpath.xpathAsString(item, "updated");
-          Date date;
-          if (dateString == null || dateString.length() == 0) {
-            date = new Date();
-          } else {
-            date = Xml.parseDate(dateString);
-          }
-          result.add(
-            new Post(0l, link, date, title, description, false, feed));
+        String title = Xpath.xpathAsString(item, "title").orElse("-no title-");
+        String link = Xpath.xpathAsString(item, "link/@href").orElse("-unknown-link-");
+        String description = Xpath.xpathAsString(item, "content").orElse("");
+        Date date = Xpath.xpathAsString(item, "updated")
+            .map(dateString -> Xml.parseDate(dateString))
+            .orElse(new Date());
+        Post post = new Post(0l, link, date, title, description, false, feed);
+        if (ff.isAllowed(post)) {
+          result.add(post);
         }
       }
     }

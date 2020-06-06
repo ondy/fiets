@@ -6,8 +6,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fiets.filter.RawPostFilter;
+import fiets.Filterer;
 import fiets.model.Feed;
+import fiets.model.Filter;
 import fiets.model.Post;
 import fiets.sources.FeedSource;
 import fiets.sources.HttpFeedSource;
@@ -23,9 +24,9 @@ public class Process {
   }
 
   public static List<Post> parsePosts(
-    Feed feed, RawPostFilter filter) throws Exception {
+    Feed feed, Filterer ff) throws Exception {
     String input = PROCESS.preprocess(feed);
-    return PROCESS.getParser(feed, input).parsePosts(feed, input, filter);
+    return PROCESS.getParser(feed, input).parsePosts(feed, input, ff);
   }
 
   public static String parseTitle(Feed feed) throws Exception {

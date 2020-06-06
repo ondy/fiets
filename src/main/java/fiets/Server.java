@@ -21,8 +21,6 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
 import fiets.db.Database;
 import fiets.display.DefaultPostDisplayProvider;
 import fiets.display.PostDisplayProvider;
-import fiets.filter.DefaultRawPostFilter;
-import fiets.filter.RawPostFilter;
 import fiets.model.Post;
 import fiets.processors.FeedProcessor;
 import fiets.processors.Process;
@@ -36,14 +34,12 @@ public class Server extends NanoHTTPD {
   private Database db;
   private FeedService fs;
   private PostDisplayProvider pdp;
-  private RawPostFilter filter;
 
   public Server(int port,
-    PostDisplayProvider thePdp, RawPostFilter theFilter)
+    PostDisplayProvider thePdp)
     throws IOException {
     super(port);
     pdp = thePdp;
-    filter = theFilter;
   }
 
   public static void main(String[] args) throws Exception {
@@ -53,9 +49,8 @@ public class Server extends NanoHTTPD {
     }
     initFietsProperties();
     PostDisplayProvider pdp = initPostDisplayProvider();
-    RawPostFilter filter = initRawPostFilter();
     initAdditionalProcessors();
-    Server srv = new Server(port, pdp, filter);
+    Server srv = new Server(port, pdp);
     srv.init();
   }
 
@@ -72,16 +67,6 @@ public class Server extends NanoHTTPD {
         | ClassNotFoundException e) {
       log.error("Could not register processors '{}'.", processors, e);
       throw new IllegalArgumentException("Could not register processors", e);
-    }
-  }
-
-  private static RawPostFilter initRawPostFilter()
-    throws Exception {
-    String filter = System.getProperty("rawpostfilter");
-    if (filter == null) {
-      return new DefaultRawPostFilter();
-    } else {
-      return (RawPostFilter) Class.forName(filter).newInstance();
     }
   }
 
@@ -125,7 +110,7 @@ public class Server extends NanoHTTPD {
     start();
     try (final Database theDb = new Database()) {
       db = theDb;
-      fs = new FeedService(db, filter);
+      fs = new FeedService(db);
       scheduleNowAndEvery(() -> {
         log.info("Triggering regular post update.");
         fs.updateAllPosts();

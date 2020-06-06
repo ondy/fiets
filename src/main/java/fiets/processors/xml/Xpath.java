@@ -3,6 +3,8 @@
  */
 package fiets.processors.xml;
 
+import java.util.Optional;
+
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -18,9 +20,9 @@ import org.w3c.dom.NodeList;
  */
 public final class Xpath {
 
-  public static String xpathAsString(Node doc, String expression)
+  public static Optional<String> xpathAsString(Node doc, String expression)
     throws XPathExpressionException {
-    return (String) xpath(doc, expression, XPathConstants.STRING);
+    return Optional.ofNullable((String) xpath(doc, expression, XPathConstants.STRING));
   }
 
   public static NodeList xpathAsNodes(Node doc, String expression)

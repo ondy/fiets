@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import fiets.filter.RawPostFilter;
+import fiets.Filterer;
 import fiets.model.Feed;
 import fiets.model.Post;
 import fiets.sources.HttpFeedSource;
@@ -53,13 +53,14 @@ public class TwitterProcessor implements FeedProcessor {
   }
 
   @Override public List<Post> parsePosts(Feed feed, String content,
-    RawPostFilter filter) throws Exception {
+    Filterer ff) throws Exception {
     Twitter tw = initTwitter(feed);
     ResponseList<Status> timeline = tw.getHomeTimeline(new Paging(1, 50));
     List<Post> result = new ArrayList<>();
     for (Status status : timeline) {
-      if (filter.isAllowed(feed, status)) {
-        result.add(toPost(feed, status));
+      Post post = toPost(feed, status);
+      if (ff.isAllowed(post)) {
+        result.add(post);
       }
     }
     return result;

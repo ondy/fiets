@@ -27,7 +27,7 @@ public class ImportOpml {
     String filename = args[0];
     List<String> urls = parseXmlUrlsFromOpml(filename);
     try (Database db = new Database()) {
-      new FeedService(db, null).addFeeds(urls);
+      new FeedService(db).addFeeds(urls);
     }
   }
 

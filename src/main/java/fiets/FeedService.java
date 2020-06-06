@@ -8,30 +8,30 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.xml.sax.SAXParseException;
 
 import fiets.db.Database;
 import fiets.db.FeedDao;
+import fiets.db.FilterDao;
 import fiets.db.PostDao;
-import fiets.filter.RawPostFilter;
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
+import fiets.model.Filter;
 import fiets.model.Post;
 import fiets.processors.Process;
 import jodd.http.HttpException;
 
 public class FeedService {
   private static final Logger log = LogManager.getLogger();
-  private final FeedDao fd;
+  private final FeedDao fed;
+  private final FilterDao fid;
   private final PostDao pd;
-  private final RawPostFilter filter;
 
-  public FeedService(Database theDb, RawPostFilter theFilter)
+  public FeedService(Database theDb)
     throws SQLException {
-    fd = new FeedDao(theDb);
+    fed = new FeedDao(theDb);
+    fid = new FilterDao(theDb, fed);
     pd = new PostDao(theDb);
-    filter = theFilter;
   }
 
   public List<Feed> addFeeds(List<String> urls)
@@ -43,7 +43,7 @@ public class FeedService {
         Feed feed = new Feed(url, null, null);
         String title = Process.parseTitle(feed);
         feed = new Feed(url, title, null);
-        feed = fd.saveFeed(feed);
+        feed = fed.saveFeed(feed);
         feeds.add(feed);
       } catch (IllegalArgumentException e) {
         log.error(e, e);
@@ -59,7 +59,7 @@ public class FeedService {
   public void updateAllPosts() {
     List<Feed> feeds;
     try {
-      feeds = fd.getAllFeeds();
+      feeds = fed.getAllFeeds();
       updateFeedPosts(feeds);
     } catch (SQLException e) {
       throw new RuntimeException(e);
@@ -69,10 +69,12 @@ public class FeedService {
   public void updateFeedPosts(List<Feed> feeds) throws SQLException {
     for (Feed feed : feeds) {
       try {
-        pd.savePosts(Process.parsePosts(feed, filter), feed);
-        fd.touchFeed(feed, "OK");
+        List<Filter> filters = fid.getFiltersForFeed(feed);
+        Filterer ff = new Filterer(filters);
+        pd.savePosts(Process.parsePosts(feed, ff), feed);
+        fed.touchFeed(feed, "OK");
       } catch (Exception e) {
-        fd.touchFeed(feed, e.getMessage());
+        fed.touchFeed(feed, e.getMessage());
         log.error("Could not update posts for {}.", feed.getLocation(), e);
       }
     }
@@ -81,13 +83,7 @@ public class FeedService {
   public static void main(String[] args) throws Exception {
     Process.parsePosts(
       new Feed("https://www.stepstone.de/5/ergebnisliste.html?ke=it%20AND%20leiter&ws=59071%20Hamm&ra=50&ob=refdate", null, null),
-      new RawPostFilter() {
-        
-        @Override public boolean isAllowed(Feed feed, Object rawPost) {
-          // TODO Auto-generated method stub
-          return true;
-        }
-      });
+      Filterer.ALL);
   }
 
   public Set<Long> getBookmarks() throws SQLException {
@@ -123,7 +119,7 @@ public class FeedService {
   }
 
   public List<FeedInfo> getAllFeedInfos() throws SQLException {
-    return fd.getAllFeedInfos();
+    return fed.getAllFeedInfos();
   }
 
   public int getBookmarksCount() throws SQLException {
@@ -131,11 +127,11 @@ public class FeedService {
   }
 
   public Feed getFeed(long feedId) throws SQLException {
-    return fd.getFeed(feedId);
+    return fed.getFeed(feedId).get();
   }
 
   public void deleteFeed(long feedId) throws SQLException {
-    fd.deleteFeed(feedId);
+    fed.deleteFeed(feedId);
     pd.deletePostsOfFeed(feedId);
   }
 
@@ -160,11 +156,11 @@ public class FeedService {
   }
 
   public List<Feed> getAllFeeds() throws SQLException {
-    return fd.getAllFeeds();
+    return fed.getAllFeeds();
   }
 
   public long lastFeedUpdate() throws SQLException {
-    return fd.lastFeedUpdate();
+    return fed.lastFeedUpdate();
   }
 
   public List<Post> postsAfter(long sinceId) throws SQLException {
@@ -181,8 +177,6 @@ public class FeedService {
 
   public void markPostRead(long id) throws SQLException {
     pd.markPostRead(id);
-    // TODO Auto-generated method stub
-
   }
 
   public void markPostUnread(long id) throws SQLException {
