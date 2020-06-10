@@ -19,8 +19,6 @@ import org.apache.logging.log4j.Logger;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import fiets.db.Database;
-import fiets.display.DefaultPostDisplayProvider;
-import fiets.display.PostDisplayProvider;
 import fiets.model.Post;
 import fiets.processors.FeedProcessor;
 import fiets.processors.Process;
@@ -33,13 +31,11 @@ public class Server extends NanoHTTPD {
   private final Timer timer = new Timer("fiets-timer", true);
   private Database db;
   private FeedService fs;
-  private PostDisplayProvider pdp;
 
-  public Server(int port,
-    PostDisplayProvider thePdp)
+  public Server(int port)
     throws IOException {
     super(port);
-    pdp = thePdp;
+    System.out.println("Fiets server listening at port " + port);
   }
 
   public static void main(String[] args) throws Exception {
@@ -48,9 +44,8 @@ public class Server extends NanoHTTPD {
       port = Integer.parseInt(args[0]);
     }
     initFietsProperties();
-    PostDisplayProvider pdp = initPostDisplayProvider();
     initAdditionalProcessors();
-    Server srv = new Server(port, pdp);
+    Server srv = new Server(port);
     srv.init();
   }
 
@@ -67,16 +62,6 @@ public class Server extends NanoHTTPD {
         | ClassNotFoundException e) {
       log.error("Could not register processors '{}'.", processors, e);
       throw new IllegalArgumentException("Could not register processors", e);
-    }
-  }
-
-  private static PostDisplayProvider initPostDisplayProvider() 
-    throws Exception {
-    String provider = System.getProperty("postdisplayprovider");
-    if (provider == null) {
-      return new DefaultPostDisplayProvider();
-    } else {
-      return (PostDisplayProvider) Class.forName(provider).newInstance();
     }
   }
 
@@ -148,7 +133,7 @@ public class Server extends NanoHTTPD {
     try {
       SessionDecorator sd = new SessionDecorator(session);
       PathMatch pm = PathMatch.match(sd);
-      View<?> view = pm.serve(sd, fs, pdp);
+      View<?> view = pm.serve(sd, fs);
       Object content = view.getContent();
       Response rsp;
       if (content instanceof String) {

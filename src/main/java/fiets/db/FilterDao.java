@@ -29,7 +29,7 @@ public class FilterDao {
         + "url VARCHAR(2048),"
         + "urlmatch TINYINT,"
         + "title VARCHAR(2048),"
-        + "titlematch TINYINT,"
+        + "titlematch TINYINT"
       + ");")) {
       return ps.executeUpdate();
     }

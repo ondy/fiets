@@ -3,10 +3,6 @@ package fiets.views;
 import java.util.List;
 import java.util.Set;
 
-import org.jsoup.Jsoup;
-
-import fiets.display.PostDisplay;
-import fiets.display.PostDisplayProvider;
 import fiets.model.Post;
 import fiets.views.Pages.Name;
 
@@ -16,17 +12,14 @@ public class PostsHtmlView implements View<String> {
   private final int unreadCount;
   private final Set<Long> bookmarked;
   private Name pageName;
-  private PostDisplayProvider pdp;
 
   public PostsHtmlView(
     Name thePageName,
-    List<Post> thePosts, Set<Long> theBookmarked, int theUnreadCount,
-    PostDisplayProvider thePdp) {
+    List<Post> thePosts, Set<Long> theBookmarked, int theUnreadCount) {
     pageName = thePageName;
     posts = thePosts;
     bookmarked = theBookmarked;
     unreadCount = theUnreadCount;
-    pdp = thePdp;
   }
 
   @Override public String getMimeType() {
@@ -45,25 +38,21 @@ public class PostsHtmlView implements View<String> {
   }
 
   private String post(Post p) {
-    PostDisplay display = pdp.getDisplay(p);
-    String cleanTitle = cleanup(display.getTitle());
-    String cleanSnippet = cleanup(display.getSnippet());
+    PostDisplay display = new PostDisplay(p);
     return String.format(
-      "<li class='list-group-item post %s %s'>"
+      "<li class='list-group-item post %s'>"
       + "<small>%s</small> | <small>%s</small>"
       + "<small class='post-actions'>"
       + bookmarkLink(p)
       + removeBookmarkLink(p)
-      + display.getAdditionalLinks()
       + "</small>"
       + "<h3 title='%s'><a href='%s'>%s</h4></a>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
-      display.getAdditionalPostClass(),
       display.getDate(), display.getFeedTitle(),
-      cleanTitle, p.getLocation(),
-      shorten(cleanTitle, 90),
-      shorten(cleanSnippet, 330));
+      display.getTitle(), p.getLocation(),
+      display.getShortenedTitle(),
+      display.getShortenedSnippet());
   }
 
   private String bookmarkLink(Post p) {
@@ -80,18 +69,6 @@ public class PostsHtmlView implements View<String> {
 
   private boolean isBookmarked(Post p) {
     return bookmarked == null || bookmarked.contains(p.getId());
-  }
-
-  private static String cleanup(String text) {
-    return Jsoup.parse(text).text()
-      .replace("'", "&apos;").replace("\"", "&quot;");
-  }
-
-  private static String shorten(String text, int maxLength) {
-    if (text.length() > maxLength) {
-      text = text.substring(0, maxLength-1) + " [&hellip;]";
-    }
-    return text;
   }
 
   private String markReadLink() {

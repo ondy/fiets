@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import fiets.display.PostDisplayProvider;
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
 import fiets.model.Post;
@@ -15,83 +14,81 @@ import fiets.views.FeedsHtmlView;
 import fiets.views.FileView;
 import fiets.views.JavaScriptView;
 import fiets.views.JsonView;
+import fiets.views.Pages.Name;
 import fiets.views.PostsHtmlView;
 import fiets.views.RedirectView;
 import fiets.views.View;
-import fiets.views.Pages.Name;
 import jodd.json.JsonObject;
 
 public enum PathMatch {
   showUnreadPosts("") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
+      SessionDecorator sd, FeedService fs) 
       throws SQLException {
       List<Post> posts = fs.getUnreadPosts(sd.intParamOr("num", 20));
       Set<Long> bookmarks = fs.getBookmarks();
       int allCount = fs.getUnreadCount();
       return new PostsHtmlView(
-        Name.unread, posts, bookmarks, allCount, pdp);
+        Name.unread, posts, bookmarks, allCount);
     }
   },
   outdatedCount("outdated-count") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
-      throws SQLException {
+      SessionDecorator sd, FeedService fs) throws SQLException {
       int count = fs.getOutdatedCount();
       return new JsonView(new JsonObject().put("outdated", count));
     }
   },
   showReadPosts("show-read") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
-      throws SQLException {
+      SessionDecorator sd, FeedService fs) throws SQLException {
       List<Post> posts = fs.getReadPosts(sd.intParamOr("num", 20));
       Set<Long> bookmarks = fs.getBookmarks();
       int allCount = fs.getUnreadCount();
       return new PostsHtmlView(
-        Name.read, posts, bookmarks, allCount, pdp);
+        Name.read, posts, bookmarks, allCount);
     }
   },
   markPostRead("markread") {
-    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException {
+    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException {
       fs.markPostsRead(sd.longParams("posts"));
       return new RedirectView(PathMatch.showUnreadPosts);
     }
   },
   showBookmarks("bookmarks") {
-    @Override public View<String> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException {
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException {
       List<Post> posts = fs.getBookmarkedPosts();
       return new PostsHtmlView(
-        Name.bookmarks, posts, Server.getIds(posts), fs.getUnreadCount(), pdp);
+        Name.bookmarks, posts, Server.getIds(posts), fs.getUnreadCount());
     }
   },
   addBookmark("add-bookmark") {
-    @Override public View<String> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException {
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException {
       fs.bookmarkPost(sd.intParam("post"));
       return new JsonView(Server.jsonOk());
     }
   },
   removeBookmark("remove-bookmark") {
-    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException {
+    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException {
       fs.removeBookmarkPost(sd.intParam("post"));
       return new RedirectView(PathMatch.showUnreadPosts);
     }
   },
   showFeeds("feeds") {
-    @Override public View<String> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException {
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException {
       List<FeedInfo> feeds = fs.getAllFeedInfos();
       return new FeedsHtmlView(
         feeds, fs.getUnreadCount(), fs.getBookmarksCount());
     }
   },
   addFeed("add-feed") {
-    @Override public View<?> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws SQLException, Exception {
+    @Override public View<?> serve(SessionDecorator sd, FeedService fs) 
+        throws SQLException, Exception {
       List<String> urls = sd.stringParams("url");
       String callback = sd.stringParam("callback");
       List<Feed> added = fs.addFeeds(urls);
@@ -106,7 +103,7 @@ public enum PathMatch {
   },
   updateFeed("update-feed") {
     @Override public View<PathMatch> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
+      SessionDecorator sd, FeedService fs) 
       throws SQLException {
       Feed feed = fs.getFeed(sd.longParam("id"));
       fs.updateFeedPosts(
@@ -116,29 +113,29 @@ public enum PathMatch {
   },
   deleteFeed("delete-feed") {
     @Override public View<PathMatch> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
+      SessionDecorator sd, FeedService fs) 
       throws SQLException {
       fs.deleteFeed(sd.longParam("id"));
       return new RedirectView(PathMatch.showFeeds);
     }
   },
   updatePosts("update") {
-    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs,
-      PostDisplayProvider pdp) throws Exception {
+    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs) 
+        throws Exception {
       fs.updateAllPosts();
       return new RedirectView(PathMatch.showUnreadPosts);
     }
   },
   feverApi("fever") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp)
+      SessionDecorator sd, FeedService fs)
       throws Exception {
       return new FeverApi().serve(sd, fs);
     }
   },
   counts("counts") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp)
+      SessionDecorator sd, FeedService fs)
       throws SQLException {
       return new JsonView(
         new JsonObject()
@@ -149,7 +146,7 @@ public enum PathMatch {
   },
   staticFile("static") {
     @Override public View<InputStream> serve(
-      SessionDecorator sd, FeedService fs, PostDisplayProvider pdp) 
+      SessionDecorator sd, FeedService fs) 
       throws FileNotFoundException {
       return new FileView(sd);
     }
@@ -167,7 +164,7 @@ public enum PathMatch {
   }
 
   public abstract View<?> serve(
-    SessionDecorator sd, FeedService fs, PostDisplayProvider pdp)
+    SessionDecorator sd, FeedService fs)
     throws Exception;
 
   public static PathMatch match(SessionDecorator sd) {

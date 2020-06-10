@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import fiets.display.StandardPostDisplay;
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
 import fiets.views.Pages.Name;
@@ -70,7 +69,7 @@ public class FeedsHtmlView implements View<String> {
       + "<span class='feed-actions'><a href='%s' class='btn btn-sm btn-light update-feed'>Update</a>"
       + "<a href='%s' class='btn btn-sm btn-danger delete-feed'>Delete</a></span>",
       f.getLocation(), f.getTitle(), fi.getNumUnread(), fi.getNumRead(),
-      StandardPostDisplay.fmtDate(fi.getMostRecentPost()), f.getLastStatus(),
+      PostDisplay.fmtDate(fi.getMostRecentPost()), f.getLastStatus(),
       updateFeedLink(f), deleteFeedLink(f));
   }
 
