@@ -83,8 +83,13 @@ public class PostsHtmlView implements View<String> {
   }
 
   private static String cleanup(String text) {
-    return Jsoup.parse(text).text()
-      .replace("'", "&apos;").replace("\"", "&quot;");
+    try {
+      return Jsoup.parse(text).text()
+        .replace("'", "&apos;").replace("\"", "&quot;");
+    } catch (Exception e) {
+      //log.error("Could not parse text: " + e, e);
+      return text;
+    }
   }
 
   private static String shorten(String text, int maxLength) {
