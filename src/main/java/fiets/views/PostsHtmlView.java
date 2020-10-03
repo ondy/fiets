@@ -42,10 +42,11 @@ public class PostsHtmlView implements View<String> {
     return String.format(
       "<li class='list-group-item post %s'>"
       + "<small>%s</small> | <small>%s</small>"
-      + "<small class='post-actions'>"
+      + "<span class='post-actions'>"
+      + addFilterLink(p)
       + bookmarkLink(p)
       + removeBookmarkLink(p)
-      + "</small>"
+      + "</span>"
       + "<h3 title='%s'><a href='%s'>%s</h4></a>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
@@ -55,15 +56,18 @@ public class PostsHtmlView implements View<String> {
       display.getShortenedSnippet());
   }
 
-  private String bookmarkLink(Post p) {
-    return String.format(
-      "<a href='%s' class='add-bookmark-link'>Bookmark</a>",
-      bookmarkUrl(p.getId()));
+  private String addFilterLink(Post p) {
+    return "<button type='button' class='btn btn-link btn-sm add-filter'>Add Filter</button>";
   }
 
+  private String bookmarkLink(Post p) {
+    return String.format(
+      "<a href='%s' class='add-bookmark btn btn-link btn-sm' role='button'>Bookmark</a>",
+      bookmarkUrl(p.getId()));
+  }
   private String removeBookmarkLink(Post p) {
     return String.format(
-      "<a href='%s' class='remove-bookmark-link'>Remove bookmark</a>",
+      "<a href='%s' class='remove-bookmark btn btn-link btn-sm' role='button'>Remove bookmark</a>",
       removeBookmarkUrl(p.getId()));
   }
 

@@ -4,13 +4,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 
 import fiets.model.Post;
 
 public class PostDisplay {
+  private static final Logger log = LogManager.getLogger();
 
-  private Post post;
+  private final Post post;
 
   public PostDisplay(Post thePost) {
     post = thePost;
@@ -57,8 +60,13 @@ public class PostDisplay {
   }
 
   private static String cleanup(String text) {
-    return Jsoup.parse(text).text()
-      .replace("'", "&apos;").replace("\"", "&quot;");
+    try {
+      return Jsoup.parse(text).text()
+              .replace("'", "&apos;").replace("\"", "&quot;");
+    } catch (RuntimeException e) {
+      log.error("Parser error: " + e, e);
+      return text;
+    }
   }
 
 }

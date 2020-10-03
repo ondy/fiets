@@ -39,7 +39,7 @@ body {
 .post h3 {
   font-size: 1.1rem;
 }
-.post.bookmarked .add-bookmark-link, .post:not(.bookmarked) .remove-bookmark-link {
+.post.bookmarked .add-bookmark, .post:not(.bookmarked) .remove-bookmark {
   display: none;
 }
 

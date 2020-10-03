@@ -26,7 +26,7 @@ setInterval(function () {
 }, 30000);
 
 $('body')
-.on('click', '.post-actions a', function (evt) {
+.on('click', '.post-actions .add-bookmark,.post-actions .remove-bookmark', function (evt) {
   evt.preventDefault();
   var $link = $(this);
   var target = $link.attr('href');
@@ -38,10 +38,10 @@ $('body')
   .done(function (data, textStatus, jqXHR) {
     var $bookmarkCount = $('.bookmark-count');
     var count = parseInt($bookmarkCount.text());
-    if ($link.hasClass('add-bookmark-link')) {
+    if ($link.hasClass('add-bookmark')) {
       $post.addClass('bookmarked');
       $bookmarkCount.text(count+1);
-    } else if ($link.hasClass('remove-bookmark-link')) {
+    } else if ($link.hasClass('remove-bookmark')) {
       $post.removeClass('bookmarked');
       $bookmarkCount.text(count-1);
     }
@@ -50,7 +50,11 @@ $('body')
     console.log(textStatus + " - " + errorThrown);
     alert(textStatus);
   });
-});
+})
+.on('click', '.post-actions .add-filter', function (evt) {
+  
+})
+;
 
 $('.bookmarklet').each(function () {
   var $a = $(this);
