@@ -51,7 +51,7 @@ public class Post implements HasId {
   }
 
   @Override public String toString() {
-    return "Post:" + title;
+    return String.format("Post: %s@%s", title, date);
   }
   public Feed getFeed() {
     return feed;

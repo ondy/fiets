@@ -21,6 +21,7 @@ public class Process {
     PROCESS.register(new RssFeedProcessor());
     PROCESS.register(new AtomFeedProcessor());
     PROCESS.register(new TwitterProcessor());
+    PROCESS.register(new FacebookProcessor());
   }
 
   public static List<Post> parsePosts(

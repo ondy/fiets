@@ -31,14 +31,7 @@ public class RssFeedProcessor implements FeedProcessor {
     if (!HttpFeedSource.isHttpSource(feed) || content == null) {
       return false;
     }
-    try {
-      content = Xml.dropSignature(content);
-      content = Xml.dropComments(content.trim());
-      return content.matches("(?s)^<([a-zA-Z0-9]+\\:)?(rss|RDF).*");
-    } catch (RuntimeException e) {
-      log.debug(e, e);
-      return false;
-    }
+    return content.contains("<rss") || content.contains("<RDF");
   }
 
   @Override public String parseTitle(Feed feed, String content)
@@ -51,7 +44,7 @@ public class RssFeedProcessor implements FeedProcessor {
   @Override public List<Post> parsePosts(
     Feed feed, String content, Filterer ff)
     throws XPathExpressionException, SAXException,
-      IOException, ParserConfigurationException, ParseException {
+      IOException, ParserConfigurationException {
     Document doc = Dom.parse(content);
     NodeList items = Xpath.xpathAsNodes(doc, "//item");
     List<Post> result = new ArrayList<>();
@@ -66,9 +59,9 @@ public class RssFeedProcessor implements FeedProcessor {
         }
         String description = Xpath.xpathAsString(item, "description").orElse("");
         Date date = Xpath.xpathAsString(item, "pubDate")
-            .map(dateString -> Xml.parseDate(dateString))
+            .map(Xml::parseDate)
             .orElse(new Date());
-        Post post = new Post(0l, link, date, title, description, false, feed);
+        Post post = new Post(0L, link, date, title, description, false, feed);
         if (ff.isAllowed(post)) {
           result.add(post);
         }

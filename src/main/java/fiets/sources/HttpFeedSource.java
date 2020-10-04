@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import jodd.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,21 +22,37 @@ public class HttpFeedSource implements FeedSource {
   private static final Logger log = LogManager.getLogger();
   
   @Override public String process(Feed feed) {
-    HttpResponse rsp = HttpRequest.get(feed.getLocation())
-      .timeout(10000)
-      .connectionTimeout(10000)
-      .trustAllCerts(true)
-      .followRedirects(true)
-      .send();
+    return readUrlContent(feed.getLocation(), "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0");
+  }
+
+  public static String readUrlContent(String url, String userAgent) {
+    HttpRequest req = HttpRequest.get(url)
+            .timeout(10000)
+            .connectionTimeout(10000)
+            .trustAllCerts(true)
+            .followRedirects(true)
+            .acceptEncoding("UTF-8");
+    if (userAgent != null) {
+      req.header("User-Agent", userAgent);
+    }
+    HttpResponse rsp = req.send();
     int status = rsp.statusCode();
     if (status != 200) {
-      log.error("Unexpected status for {} : {}", feed.getLocation(), status);
+      log.error("Unexpected status for {} : {}", url, status);
     }
+    fixCharset(rsp);
     String text = rsp.bodyText();
     if (text.startsWith(UTF8_BOM)) {
       text = text.substring(1);
     }
     return text.trim();
+  }
+
+  private static void fixCharset(HttpResponse rsp) {
+    String cs = rsp.charset();
+    if (cs != null && cs.startsWith("\"")) {
+      rsp.charset(StringUtil.removeQuotes(cs));
+    }
   }
 
   @Override public boolean canHandle(Feed feed) {
