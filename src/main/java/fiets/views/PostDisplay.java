@@ -20,7 +20,7 @@ public class PostDisplay {
   }
 
   public String getTitle() {
-    return post.getTitle();
+    return cleanup(post.getTitle());
   }
 
   public String getShortenedTitle() {
@@ -32,7 +32,7 @@ public class PostDisplay {
     if (snippet == null || snippet.trim().length() == 0) {
       snippet = post.getTitle();
     }
-    return shorten(snippet, 330);
+    return shorten(cleanup(snippet), 330);
   }
 
   public String getDate() {
