@@ -27,6 +27,12 @@ public class FacebookProcessor implements FeedProcessor {
 
   private static final String FB_HOST = "mobile.facebook.com";
 
+  public static void main(String[] args) {
+    String content = HttpFeedSource.readUrlContent("https://mobile.facebook.com/ducke.de");
+    Feed f = new Feed("https://mobile.facebook.com/ducke.de", "", "");
+    new FacebookProcessor().parsePosts(f, content, new Filterer(Collections.emptyList()));
+  }
+
   @Override public boolean canHandle(Feed feed, String content) {
     try {
       return new URL(feed.getLocation()).getHost().equals(FB_HOST);
@@ -42,20 +48,21 @@ public class FacebookProcessor implements FeedProcessor {
 
   @Override public List<Post> parsePosts(
     Feed feed, String content, Filterer ff) {
-    Jerry articles = Jerry.jerry(content).find("article");
+    Jerry articles = Jerry.jerry(content).find("section > article");
     List<Post> result = new ArrayList<>();
     //noinspection Convert2Lambda
     articles.each(new JerryFunction() {
       @Override
       public Boolean onNode(Jerry $this, int index) {
-        String title = $this.find("header h3").text();
+        Jerry titleTag = $this.find("header > h3").eq(0);
+        String title = titleTag.text();
         Jerry a = $this.find("a[href^='/story.php']");
         String link = feed.getLocation();
         if (a.length() > 0) {
           link = fixUrl(a.attr("href"));
         }
-        String description = $this.find("p").text();
-        String mainTitle = $this.find("header h3 a").text();
+        String description = $this.find("p").eq(0).text();
+        String mainTitle = titleTag.find("a").text();
         if (title.equals(mainTitle)) {
           title = title + " - " + description.substring(0, Math.min(50, description.length()));
         } else {
@@ -64,6 +71,7 @@ public class FacebookProcessor implements FeedProcessor {
         Date date = extractDate($this);
 
         Post post = new Post(0L, link, date, title, description, false, feed);
+        System.out.println(title + " - " + link);
         if (ff.isAllowed(post)) {
           result.add(post);
         }

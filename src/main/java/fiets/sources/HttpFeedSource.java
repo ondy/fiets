@@ -19,22 +19,21 @@ import jodd.http.HttpResponse;
 
 public class HttpFeedSource implements FeedSource {
   public static final String UTF8_BOM = "\uFEFF";
+  private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0";
   private static final Logger log = LogManager.getLogger();
   
   @Override public String process(Feed feed) {
-    return readUrlContent(feed.getLocation(), "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:81.0) Gecko/20100101 Firefox/81.0");
+    return readUrlContent(feed.getLocation());
   }
 
-  public static String readUrlContent(String url, String userAgent) {
+  public static String readUrlContent(String url) {
     HttpRequest req = HttpRequest.get(url)
             .timeout(10000)
             .connectionTimeout(10000)
             .trustAllCerts(true)
             .followRedirects(true)
             .acceptEncoding("UTF-8");
-    if (userAgent != null) {
-      req.header("User-Agent", userAgent);
-    }
+    req.header("User-Agent", USER_AGENT);
     HttpResponse rsp = req.send();
     int status = rsp.statusCode();
     if (status != 200) {
