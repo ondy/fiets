@@ -35,7 +35,7 @@ public class FeedService {
   }
 
   public List<Feed> addFeeds(List<String> urls)
-    throws SQLException, Exception {
+    throws Exception {
     List<Feed> feeds = new ArrayList<>();
     for (String url : urls) {
       log.info("Analysing feed {}.", url);
@@ -78,12 +78,6 @@ public class FeedService {
         log.error("Could not update posts for {}.", feed.getLocation(), e);
       }
     }
-  }
-  
-  public static void main(String[] args) throws Exception {
-    Process.parsePosts(
-      new Feed("https://www.stepstone.de/5/ergebnisliste.html?ke=it%20AND%20leiter&ws=59071%20Hamm&ra=50&ob=refdate", null, null),
-      Filterer.ALL);
   }
 
   public Set<Long> getBookmarks() throws SQLException {
