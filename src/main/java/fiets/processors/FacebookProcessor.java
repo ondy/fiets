@@ -48,14 +48,14 @@ public class FacebookProcessor implements FeedProcessor {
     articles.each(new JerryFunction() {
       @Override
       public Boolean onNode(Jerry $this, int index) {
-        String title = $this.find("h3").text();
+        String title = $this.find("header h3").text();
         Jerry a = $this.find("a[href^='/story.php']");
         String link = feed.getLocation();
         if (a.length() > 0) {
           link = fixUrl(a.attr("href"));
         }
         String description = $this.find("p").text();
-        String mainTitle = $this.find("h3 a").text();
+        String mainTitle = $this.find("header h3 a").text();
         if (title.equals(mainTitle)) {
           title = title + " - " + description.substring(0, Math.min(50, description.length()));
         } else {
