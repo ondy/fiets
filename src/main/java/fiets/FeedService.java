@@ -28,14 +28,14 @@ public class FeedService {
   private final PostDao pd;
 
   public FeedService(Database theDb)
-    throws SQLException {
+          throws SQLException {
     fed = new FeedDao(theDb);
     fid = new FilterDao(theDb, fed);
     pd = new PostDao(theDb);
   }
 
   public List<Feed> addFeeds(List<String> urls)
-    throws Exception {
+          throws Exception {
     List<Feed> feeds = new ArrayList<>();
     for (String url : urls) {
       log.info("Analysing feed {}.", url);
@@ -180,4 +180,5 @@ public class FeedService {
   public void markAllRead(Date before) throws SQLException {
     pd.markAllRead(before);
   }
+
 }

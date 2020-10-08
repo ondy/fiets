@@ -71,13 +71,15 @@ public class FacebookProcessor implements FeedProcessor {
         Date date = extractDate($this);
 
         Post post = new Post(0L, link, date, title, description, false, feed);
-        System.out.println(title + " - " + link);
         if (ff.isAllowed(post)) {
           result.add(post);
         }
         return true;
       }
     });
+    if (result.isEmpty()) {
+      result.add(Process.errorPost(feed, "No posts found!"));
+    }
     return result;
   }
 

@@ -1,5 +1,6 @@
 package fiets.processors;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,5 +70,17 @@ public class Process {
 
   public static void registerProcessor(FeedProcessor processor) {
      PROCESS.register(processor);
+  }
+
+  public static Post errorPost(Feed f, String title) {
+    return errorPost(f, title, null);
+  }
+
+  public static Post errorPost(Feed f, String title, Throwable t) {
+    Date d = new Date();
+    Post post = new Post(0L, f.getLocation() + "?ts=" + d.getTime(), d,
+            String.format("Error: %s - %s", f.getTitle(), title),
+            t == null ? "" : t.getMessage(), false, f);
+    return post;
   }
 }
