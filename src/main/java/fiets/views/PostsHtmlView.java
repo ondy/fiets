@@ -47,7 +47,7 @@ public class PostsHtmlView implements View<String> {
       + bookmarkLink(p)
       + removeBookmarkLink(p)
       + "</span>"
-      + "<h3 title='%s'><a href='%s'>%s</h4></a>"
+      + "<h3 title='%s'><a href='%s' target='_blank'>%s</h4></a>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
       display.getDate(), display.getFeedTitle(),
