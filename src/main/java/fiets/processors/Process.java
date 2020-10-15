@@ -1,5 +1,6 @@
 package fiets.processors;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,7 +79,8 @@ public class Process {
 
   public static Post errorPost(Feed f, String title, Throwable t) {
     Date d = new Date();
-    Post post = new Post(0L, f.getLocation() + "?ts=" + d.getTime(), d,
+    Post post = new Post(0L, f.getLocation() + "?date="
+            + new SimpleDateFormat("yyyyMMdd").format(d), d,
             String.format("Error: %s - %s", f.getTitle(), title),
             t == null ? "" : t.getMessage(), false, f);
     return post;
