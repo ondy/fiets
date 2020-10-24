@@ -3,21 +3,13 @@ package fiets.processors;
 import fiets.Filterer;
 import fiets.model.Feed;
 import fiets.model.Post;
-import fiets.sources.HttpFeedSource;
-import jodd.http.HttpMultiMap;
-import jodd.http.HttpRequest;
 import jodd.jerry.Jerry;
-import jodd.jerry.JerryFunction;
-import jodd.json.JsonObject;
-import jodd.json.JsonParser;
-import jodd.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -25,13 +17,7 @@ public class FacebookProcessor implements FeedProcessor {
 
   private static final Logger log = LogManager.getLogger();
 
-  private static final String FB_HOST = "mobile.facebook.com";
-
-  public static void main(String[] args) {
-    String content = HttpFeedSource.readUrlContent("https://mobile.facebook.com/ducke.de");
-    Feed f = new Feed("https://mobile.facebook.com/ducke.de", "", "");
-    new FacebookProcessor().parsePosts(f, content, new Filterer(Collections.emptyList()));
-  }
+  private static final String FB_HOST = "www.facebook.com";
 
   @Override public boolean canHandle(Feed feed, String content) {
     try {
@@ -47,64 +33,86 @@ public class FacebookProcessor implements FeedProcessor {
   }
 
   @Override public List<Post> parsePosts(
-    Feed feed, String content, Filterer ff) {
-    Jerry articles = Jerry.jerry(content).find("section > article");
+          Feed feed, String content, Filterer ff) {
     List<Post> result = new ArrayList<>();
-    //noinspection Convert2Lambda
-    articles.each(new JerryFunction() {
-      @Override
-      public Boolean onNode(Jerry $this, int index) {
-        Jerry titleTag = $this.find("header > h3").eq(0);
-        String title = titleTag.text();
-        Jerry a = $this.find("a[href^='/story.php']");
-        String link = feed.getLocation();
-        if (a.length() > 0) {
-          link = fixUrl(a.attr("href"));
-        }
-        String description = $this.find("p").eq(0).text();
-        String mainTitle = titleTag.find("a").text();
-        if (title.equals(mainTitle)) {
-          title = title + " - " + description.substring(0, Math.min(50, description.length()));
-        } else {
-          title = StringUtil.insert(title, " - ", mainTitle.length());
-        }
-        Date date = extractDate($this);
 
-        Post post = new Post(0L, link, date, title, description, false, feed);
-        if (ff.isAllowed(post)) {
-          result.add(post);
+    Jerry jerry = Jerry.jerry(content);
+    int maxLevel = findMaxHLevel(jerry);
+    Jerry titles = jerry.find("h" + maxLevel);
+    titles.forEach(title -> {
+      Jerry parent = title.parent();
+      for (int i = 0; i < 20; i++) {
+        int len = parent.text().length();
+        if (len > 100) {
+          Post p = createPost(title, parent, feed);
+          if (ff.isAllowed(p)) {
+            result.add(p);
+          }
+          break;
         }
-        return true;
+        parent = parent.parent();
       }
     });
+
     if (result.isEmpty()) {
       result.add(Process.errorPost(feed, "No posts found!"));
     }
     return result;
   }
 
-  private String fixUrl(String href) {
-    if (href.startsWith("/")) {
-      href = "https://" + FB_HOST + href;
-    }
-    HttpMultiMap<String> query = HttpRequest.get(href).query();
-    String fbid = query.get("story_fbid");
-    String id = query.get("id");
-    return String.format("https://%s/story.php?story_fbid=%s&id=%s",
-            FB_HOST, fbid, id);
-  }
-
-  private static Date extractDate(Jerry article) {
+  private Date tryFindDate(Jerry post) {
     try {
-      String ft = article.eq(0).attr("data-ft");
-      JsonObject json = JsonParser.create().parseAsJsonObject(ft);
-      JsonObject insights = json.getJsonObject("page_insights");
-      String first = insights.fieldNames().iterator().next();
-      Long time = insights.getJsonObject(first).getJsonObject("post_context").getLong("publish_time");
-      return new Date(time*1000);
+      String utime = post.find("[data-utime]").attr("data-utime");
+      if (utime != null) {
+        return new Date(Long.parseLong(utime) * 1000);
+      } else {
+        return new Date();
+      }
     } catch (RuntimeException e) {
       return new Date();
     }
   }
 
+//    String content = HttpFeedSource.readUrlContent("https://www.facebook.com/westfaelischer.anzeiger/posts/?_fb_noscript=1");
+  private Post createPost(Jerry title, Jerry post, Feed feed) {
+    String link = tryFindUrl(title, post);
+    Date date = tryFindDate(post);
+    String titleString = title.text();
+    if (titleString.length() < 10) {
+      titleString = post.text().substring(0, 100);
+    }
+    post.find("[class^='timestamp']").remove();
+    return new Post(0L, link, date, titleString, post.text(), false, feed);
+  }
+
+  private String tryFindUrl(Jerry title, Jerry parent) {
+    String urlCandidate = null;
+    Jerry a = title.find("a");
+    if (a.length() > 0) {
+      urlCandidate = a.attr("href");
+    }
+    a = parent.find("a[href^='/']");
+    if (a.length() > 0) {
+      urlCandidate = a.attr("href");
+    }
+    if (urlCandidate == null) {
+      urlCandidate = "https://" + FB_HOST + "?" + System.currentTimeMillis();
+    } else if (!urlCandidate.startsWith("http://") && !urlCandidate.startsWith("https://")) {
+      urlCandidate = "https://" + FB_HOST + urlCandidate;
+    }
+    return urlCandidate;
+  }
+
+  private int findMaxHLevel(Jerry jerry) {
+    int maxCount = 0;
+    int maxLevel = 0;
+    for (int i = 1; i <= 6; i++) {
+      int thisCount = jerry.find("h" + i).length();
+      if (thisCount > maxCount) {
+        maxCount = thisCount;
+        maxLevel = i;
+      }
+    }
+    return maxLevel;
+  }
 }
