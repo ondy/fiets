@@ -77,6 +77,7 @@ public class FacebookProcessor implements FeedProcessor {
   private Post createPost(Jerry title, Jerry post, Feed feed) {
     String link = tryFindUrl(title, post);
     Date date = tryFindDate(post);
+    title.find("[class^='timestamp']").remove();
     String titleString = title.text();
     if (titleString.length() < 10) {
       titleString = post.text().substring(0, 100);
