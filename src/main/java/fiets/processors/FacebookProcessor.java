@@ -100,7 +100,15 @@ public class FacebookProcessor implements FeedProcessor {
     } else if (!urlCandidate.startsWith("http://") && !urlCandidate.startsWith("https://")) {
       urlCandidate = "https://" + FB_HOST + urlCandidate;
     }
-    return urlCandidate;
+    return removeUrlQuery(urlCandidate);
+  }
+
+  private String removeUrlQuery(String urlCandidate) {
+    int qm = urlCandidate.indexOf('?');
+    if (qm < 0) {
+      return urlCandidate;
+    }
+    return urlCandidate.substring(0, qm);
   }
 
   private int findMaxHLevel(Jerry jerry) {
