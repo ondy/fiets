@@ -1,35 +1,24 @@
 package fiets;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import fiets.db.Database;
 import fiets.model.Post;
-import fiets.processors.FeedProcessor;
-import fiets.processors.Process;
 import fiets.views.View;
 import jodd.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.*;
 
 public class Server extends NanoHTTPD {
 
   private static final Logger log = LogManager.getLogger();
   private final Timer timer = new Timer("fiets-timer", true);
-  private Database db;
   private FeedService fs;
 
   public Server(int port) {
@@ -42,37 +31,8 @@ public class Server extends NanoHTTPD {
     if (args.length > 0) {
       port = Integer.parseInt(args[0]);
     }
-    initFietsProperties();
-    initAdditionalProcessors();
     Server srv = new Server(port);
     srv.init();
-  }
-
-  private static void initAdditionalProcessors() {
-    String processors = System.getProperty("processors");
-    try {
-      if (processors != null) {
-        for (String processor : processors.split(",")) {
-          Process.registerProcessor(
-            (FeedProcessor) Class.forName(processor).newInstance());
-        }
-      }
-    } catch (InstantiationException | IllegalAccessException
-        | ClassNotFoundException e) {
-      log.error("Could not register processors '{}'.", processors, e);
-      throw new IllegalArgumentException("Could not register processors", e);
-    }
-  }
-
-  private static void initFietsProperties() throws IOException {
-    File f = new File("fiets.properties");
-    if (f.exists()) {
-      Properties fprops = new Properties();
-      fprops.load(new FileInputStream(f));
-      for (String name : fprops.stringPropertyNames()) {
-        System.setProperty(name, fprops.getProperty(name));
-      }
-    }
   }
 
   private void scheduleNowAndEvery(Runnable r, long everyMillis) {
@@ -92,8 +52,7 @@ public class Server extends NanoHTTPD {
 
   private void init() throws IOException, SQLException {
     start();
-    try (final Database theDb = new Database()) {
-      db = theDb;
+    try (Database db = new Database()) {
       fs = new FeedService(db);
       scheduleNowAndEvery(() -> {
         log.info("Triggering regular post update.");
@@ -105,8 +64,6 @@ public class Server extends NanoHTTPD {
         log.info("Done deleting outdated posts.");
       }, dayMillis());
       waitForever();
-    } finally {
-      db = null;
     }
   }
 
