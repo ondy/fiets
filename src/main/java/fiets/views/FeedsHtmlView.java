@@ -51,7 +51,7 @@ public class FeedsHtmlView implements View<String> {
   }
 
   private String bookmarkletUrl() {
-      return Pages.getResource("js/bookmarklet.js")
+      return "javascript:void%20function(a){var%20b=function(a){a.ajax({url:%HOST%/add-feed%22,dataType:%22jsonp%22,data:{url:window.location.href}}).done(function(a){alert(a.title||a.error)})};if(a%26%26a.fn%26%261.7%3C=parseFloat(a.fn.jquery))return%20void%20load(a);var%20c=document.createElement(%22script%22);c.src=%22https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js%22,c.onload=c.onreadystatechange=function(){var%20a=this.readyState;a%26%26%22loaded%22!==a%26%26%22complete%22!==a||b(jQuery.noConflict())},document.getElementsByTagName(%22head%22)[0].appendChild(c)}(window.jQuery);"
         .replace("%HOST%", hostname);
   }
 
