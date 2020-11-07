@@ -9,9 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class FacebookProcessor implements FeedProcessor {
 
@@ -35,7 +33,7 @@ public class FacebookProcessor implements FeedProcessor {
   @Override public List<Post> parsePosts(
           Feed feed, String content, Filterer ff) {
     List<Post> result = new ArrayList<>();
-
+    Set<String> doubleUrlsInOneTake = new HashSet<>();
     Jerry jerry = Jerry.jerry(content);
     int maxLevel = findMaxHLevel(jerry);
     Jerry titles = jerry.find("h" + maxLevel);
@@ -46,7 +44,10 @@ public class FacebookProcessor implements FeedProcessor {
         if (len > 100) {
           Post p = createPost(title, parent, feed);
           if (ff.isAllowed(p)) {
-            result.add(p);
+            if (!doubleUrlsInOneTake.contains(p.getLocation())) {
+              result.add(p);
+              doubleUrlsInOneTake.add(p.getLocation());
+            }
           }
           break;
         }
@@ -73,13 +74,12 @@ public class FacebookProcessor implements FeedProcessor {
     }
   }
 
-//    String content = HttpFeedSource.readUrlContent("https://www.facebook.com/westfaelischer.anzeiger/posts/?_fb_noscript=1");
   private Post createPost(Jerry title, Jerry post, Feed feed) {
     String link = tryFindUrl(title, post);
     Date date = tryFindDate(post);
     post.find("[class^='timestamp']").remove();
     String titleString = title.text();
-    if (titleString.length() < 10) {
+    if (titleString.length() < 20) {
       titleString = post.text().substring(0, 100);
     }
     return new Post(0L, link, date, titleString, post.text(), false, feed);
