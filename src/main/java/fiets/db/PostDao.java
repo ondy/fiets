@@ -136,14 +136,29 @@ public class PostDao {
     }
   }
 
-  public void deletePostsOfFeed(long feedId) throws SQLException {
+  public void deletePost(long id) throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "DELETE FROM post " +
-              "LEFT JOIN postfeed ON post.id=postfeed.post " +
-              "WHERE postfeed.feed=? ")) {
-      ps.setLong(1, feedId);
+            "DELETE FROM post WHERE id=?")) {
+      ps.setLong(1, id);
       ps.executeUpdate();
     }
+  }
+
+  public void deletePostsOfFeed(long feedId) throws SQLException {
+    try (PreparedStatement ps = db.getConnection().prepareStatement(
+            "SELECT post.id FROM post " +
+            "INNER JOIN postfeed ON post.id=postfeed.post " +
+            "WHERE postfeed.feed=?")) {
+      ps.setLong(1, feedId);
+      try (ResultSet rs = ps.executeQuery()) {
+        List<Post> posts = new ArrayList<>();
+        while (rs.next()) {
+          long id = rs.getLong(1);
+          deletePost(id);
+        }
+      }
+    }
+
     try (PreparedStatement ps = db.getConnection().prepareStatement(
       "DELETE FROM postfeed WHERE postfeed.feed=?")) {
       ps.setLong(1, feedId);
