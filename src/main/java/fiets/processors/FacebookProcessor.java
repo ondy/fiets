@@ -80,7 +80,9 @@ public class FacebookProcessor implements FeedProcessor {
     post.find("[class^='timestamp']").remove();
     String titleString = title.text();
     if (titleString.length() < 20) {
-      titleString = post.text().substring(0, 100);
+      String postText = post.text();
+      int len = Math.min(postText.length(), 100);
+      titleString = post.text().substring(0, len);
     }
     return new Post(0L, link, date, titleString, post.text(), false, feed);
   }
