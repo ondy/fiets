@@ -61,7 +61,7 @@ public class PostDao {
   }
 
   public Post savePost(Post post, Feed feed) throws SQLException {
-    if (post.getId() == 0l) {
+    if (post.getId() == 0L) {
       Post existing = loadPostByLocation(post.getLocation());
       if (existing == null) {
         post = insertPost(post);
@@ -138,8 +138,9 @@ public class PostDao {
 
   public void deletePostsOfFeed(long feedId) throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "DELETE FROM post WHERE postfeed.feed=? "
-          + "LEFT JOIN postfeed ON post.id=postfeed.post")) {
+      "DELETE FROM post " +
+              "LEFT JOIN postfeed ON post.id=postfeed.post " +
+              "WHERE postfeed.feed=? ")) {
       ps.setLong(1, feedId);
       ps.executeUpdate();
     }
