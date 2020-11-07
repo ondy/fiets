@@ -11,12 +11,14 @@ import fiets.views.Pages.Name;
 
 public class FeedsHtmlView implements View<String> {
 
+  private final String hostname;
   private List<FeedInfo> feeds;
   private int unreadCount;
   private int bookmarkCount;
 
-  public FeedsHtmlView(List<FeedInfo> feedInfos,
+  public FeedsHtmlView(String theHostname, List<FeedInfo> feedInfos,
     int theUnreadCount, int theBookmarkCount) {
+    hostname = theHostname;
     feeds = feedInfos;
     unreadCount = theUnreadCount;
     bookmarkCount = theBookmarkCount;
@@ -51,15 +53,9 @@ public class FeedsHtmlView implements View<String> {
       bookmarkletUrl());
   }
 
-  static String bookmarkletUrl() {
-    try {
-      String inner = "javascript:(function(){function callback(){(function($){var jQuery=$;$.ajax({url: \"%HOST%/add-feed\",dataType: \"jsonp\",data: {url: window.location.href}}).done(function (data) {alert(data.title || data.error);})})(jQuery.noConflict(true))}var s=document.createElement(\"script\");s.src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js\";if(s.addEventListener){s.addEventListener(\"load\",callback,false)}else if(s.readyState){s.onreadystatechange=callback}document.body.appendChild(s);})()";
-      inner = URLEncoder.encode(inner, StandardCharsets.ISO_8859_1.name());
-      inner = inner.replace("+", "%20").replace("%28", "(").replace("%29", ")");
-      return "javascript:(" + inner + ")()";
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException(e);
-    }
+  private String bookmarkletUrl() {
+      return Pages.getResource("static/bookmarklet.js")
+        .replace("%HOST%", hostname);
   }
 
   private String feed(FeedInfo fi) {

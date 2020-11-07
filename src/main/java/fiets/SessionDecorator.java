@@ -110,4 +110,11 @@ public class SessionDecorator {
     return session.getParameters();
   }
 
+  public String getHostname() {
+    String host = session.getHeaders().get("Host");
+    if (host == null) {
+      return "unknown";
+    }
+    return host;
+  }
 }

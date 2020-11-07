@@ -22,7 +22,7 @@ public final class Pages {
   private static final String HEADER_TEMPLATE = getResource("html/header.html");
   private static final String FOOTER_TEMPLATE = getResource("html/footer.html");
 
-  private static String getResource(String name) {
+  public static String getResource(String name) {
     try (InputStream stream = Pages.class.getResourceAsStream(name)) {
       try (Scanner s = new Scanner(stream, StandardCharsets.UTF_8.name())) {
         return s.useDelimiter("\\Z").next();

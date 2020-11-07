@@ -83,7 +83,7 @@ public enum PathMatch {
         throws SQLException {
       List<FeedInfo> feeds = fs.getAllFeedInfos();
       return new FeedsHtmlView(
-        feeds, fs.getUnreadCount(), fs.getBookmarksCount());
+        sd.getHostname(), feeds, fs.getUnreadCount(), fs.getBookmarksCount());
     }
   },
   addFeed("add-feed") {
