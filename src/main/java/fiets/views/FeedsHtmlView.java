@@ -1,8 +1,5 @@
 package fiets.views;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import fiets.model.Feed;
@@ -54,7 +51,7 @@ public class FeedsHtmlView implements View<String> {
   }
 
   private String bookmarkletUrl() {
-      return Pages.getResource("static/bookmarklet.js")
+      return Pages.getResource("js/bookmarklet.js")
         .replace("%HOST%", hostname);
   }
 
