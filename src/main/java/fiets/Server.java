@@ -32,8 +32,7 @@ public class Server extends NanoHTTPD {
   private Database db;
   private FeedService fs;
 
-  public Server(int port)
-    throws IOException {
+  public Server(int port) {
     super(port);
     System.out.println("Fiets server listening at port " + port);
   }
@@ -99,7 +98,7 @@ public class Server extends NanoHTTPD {
       scheduleNowAndEvery(() -> {
         log.info("Triggering regular post update.");
         fs.updateAllPosts();
-      }, minutesMillis(10));
+      }, minutesMillis(20));
       scheduleNowAndEvery(() -> {
         log.info("Deleting {} outdated posts.", fs.getOutdatedCount());
         fs.dropOutdated();
