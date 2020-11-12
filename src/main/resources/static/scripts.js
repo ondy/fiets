@@ -62,6 +62,6 @@ $('.bookmarklet').each(function () {
   var url = window.location.href;
   var pos = url.indexOf('://') + 3;
   pos = url.indexOf('/', pos);
-  href = href.replace("%HOST%", url.substring(0, pos+1));
+  href = href.replace("*HOST*", url.substring(0, pos+1));
   $a.attr("href", href);
 });

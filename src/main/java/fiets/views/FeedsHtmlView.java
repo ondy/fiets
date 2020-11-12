@@ -1,13 +1,16 @@
 package fiets.views;
 
-import java.util.List;
-
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
 import fiets.views.Pages.Name;
 
-public class FeedsHtmlView implements View<String> {
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+public class FeedsHtmlView implements View<String> {
+  private static final String BOOKMARKLET = "javascript:(function()%7Bfunction%20callback()%7B(function(%24)%7Bvar%20jQuery%3D%24%3B%24.ajax(%7Burl%3A%20%22*HOST*%2Fadd-feed%22%2CdataType%3A%20%22jsonp%22%2Cdata%3A%20%7B%20url%3A%20window.location.href%20%7D%7D).done(function%20(data)%20%7Balert(data.title%20%7C%7C%20data.error)%3B%7D)%7D)(jQuery.noConflict(true))%7Dvar%20s%3Ddocument.createElement(%22script%22)%3Bs.src%3D%22https%3A%2F%2Fajax.googleapis.com%2Fajax%2Flibs%2Fjquery%2F1.11.1%2Fjquery.min.js%22%3Bif(s.addEventListener)%7Bs.addEventListener(%22load%22%2Ccallback%2Cfalse)%7Delse%20if(s.readyState)%7Bs.onreadystatechange%3Dcallback%7Ddocument.body.appendChild(s)%3B%7D)()";
   private final String hostname;
   private List<FeedInfo> feeds;
   private int unreadCount;
@@ -47,12 +50,7 @@ public class FeedsHtmlView implements View<String> {
   private String addFeedBookmarklet() {
     return String.format(
       "<a href='%s' class='btn btn-info bookmarklet'>add-feed bookmarklet</a>",
-      bookmarkletUrl());
-  }
-
-  private String bookmarkletUrl() {
-      return "javascript:void%20function(a){var%20b=function(a){a.ajax({url:%HOST%/add-feed%22,dataType:%22jsonp%22,data:{url:window.location.href}}).done(function(a){alert(a.title||a.error)})};if(a%26%26a.fn%26%261.7%3C=parseFloat(a.fn.jquery))return%20void%20load(a);var%20c=document.createElement(%22script%22);c.src=%22https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js%22,c.onload=c.onreadystatechange=function(){var%20a=this.readyState;a%26%26%22loaded%22!==a%26%26%22complete%22!==a||b(jQuery.noConflict())},document.getElementsByTagName(%22head%22)[0].appendChild(c)}(window.jQuery);"
-        .replace("%HOST%", hostname);
+      BOOKMARKLET);
   }
 
   private String feed(FeedInfo fi) {

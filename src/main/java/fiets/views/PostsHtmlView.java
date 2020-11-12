@@ -57,7 +57,7 @@ public class PostsHtmlView implements View<String> {
   }
 
   private String addFilterLink(Post p) {
-    return "";//""<button type='button' class='btn btn-link btn-sm add-filter'>Add Filter</button>";
+    return "<button type='button' class='btn btn-link btn-sm add-filter'>Add Filter</button>";
   }
 
   private String bookmarkLink(Post p) {
