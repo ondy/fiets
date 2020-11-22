@@ -33,8 +33,10 @@ public class PostsHtmlView implements View<String> {
     for (Post p : posts) {
       sb.append(post(p));
     }
-    return sb.append("</ul>").append(
-      Pages.footerTemplate(markReadLink())).toString();
+    return sb.append("</ul>")
+            .append(Pages.editFilterTemplate())
+            .append(Pages.footerTemplate(markReadLink()))
+            .toString();
   }
 
   private String post(Post p) {

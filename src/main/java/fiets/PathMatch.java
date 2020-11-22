@@ -5,19 +5,12 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import fiets.model.Feed;
-import fiets.model.FeedInfo;
-import fiets.model.Post;
-import fiets.views.FeedsHtmlView;
-import fiets.views.FileView;
-import fiets.views.JavaScriptView;
-import fiets.views.JsonView;
+import fiets.model.*;
+import fiets.views.*;
 import fiets.views.Pages.Name;
-import fiets.views.PostsHtmlView;
-import fiets.views.RedirectView;
-import fiets.views.View;
 import jodd.json.JsonObject;
 
 public enum PathMatch {
@@ -34,7 +27,7 @@ public enum PathMatch {
   },
   outdatedCount("outdated-count") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs) throws SQLException {
+      SessionDecorator sd, FeedService fs) {
       int count = fs.getOutdatedCount();
       return new JsonView(new JsonObject().put("outdated", count));
     }
@@ -86,9 +79,18 @@ public enum PathMatch {
         sd.getHostname(), feeds, fs.getUnreadCount(), fs.getBookmarksCount());
     }
   },
+  showFilters("filters") {
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs)
+        throws SQLException {
+      List<Filter> filters = fs.getAllFilters();
+      return new FiltersHtmlView(
+          sd.getHostname(), filters, fs.getUnreadCount(), fs.getBookmarksCount()
+      );
+    }
+  },
   addFeed("add-feed") {
     @Override public View<?> serve(SessionDecorator sd, FeedService fs) 
-        throws SQLException, Exception {
+        throws Exception {
       List<String> urls = sd.stringParams("url");
       String callback = sd.stringParam("callback");
       List<Feed> added = fs.addFeeds(urls);
@@ -120,8 +122,7 @@ public enum PathMatch {
     }
   },
   updatePosts("update") {
-    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs) 
-        throws Exception {
+    @Override public View<PathMatch> serve(SessionDecorator sd, FeedService fs) {
       fs.updateAllPosts();
       return new RedirectView(PathMatch.showUnreadPosts);
     }
@@ -150,12 +151,23 @@ public enum PathMatch {
       throws FileNotFoundException {
       return new FileView(sd);
     }
-  }
-  ;
+  },
+  addFilter("add-filter") {
+    @Override public View<?> serve(SessionDecorator sd, FeedService fs)
+            throws Exception {
+      Map<String, List<String>> post = sd.postParameters();
+      String url = post.get("url").get(0);
+      FilterMatch urlMatch = FilterMatch.valueOf(post.get("urlMatch").get(0));
+      String title = post.get("title").get(0);
+      FilterMatch titleMatch = FilterMatch.valueOf(post.get("titleMatch").get(0));
+      fs.addFilter(url, urlMatch, title, titleMatch);
+      return new JsonView(Server.jsonOk());
+    }
+  };
 
   private String base;
 
-  private PathMatch(String theBase) {
+  PathMatch(String theBase) {
     base = theBase;
   }
 

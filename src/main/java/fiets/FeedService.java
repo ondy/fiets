@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import fiets.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXParseException;
@@ -14,10 +15,6 @@ import fiets.db.Database;
 import fiets.db.FeedDao;
 import fiets.db.FilterDao;
 import fiets.db.PostDao;
-import fiets.model.Feed;
-import fiets.model.FeedInfo;
-import fiets.model.Filter;
-import fiets.model.Post;
 import fiets.processors.Process;
 import jodd.http.HttpException;
 
@@ -67,10 +64,10 @@ public class FeedService {
   }
 
   public void updateFeedPosts(List<Feed> feeds) throws SQLException {
+    List<Filter> allFilters = fid.getAllFilters();
+    Filterer ff = new Filterer(allFilters);
     for (Feed feed : feeds) {
       try {
-        List<Filter> filters = fid.getFiltersForFeed(feed);
-        Filterer ff = new Filterer(filters);
         pd.savePosts(Process.parsePosts(feed, ff), feed);
         fed.touchFeed(feed, "OK");
       } catch (Exception e) {
@@ -153,6 +150,10 @@ public class FeedService {
     return fed.getAllFeeds();
   }
 
+  public List<Filter> getAllFilters() throws SQLException {
+    return fid.getAllFilters();
+  }
+
   public long lastFeedUpdate() throws SQLException {
     return fed.lastFeedUpdate();
   }
@@ -181,4 +182,8 @@ public class FeedService {
     pd.markAllRead(before);
   }
 
+  public void addFilter(String url, FilterMatch urlMatch, String title, FilterMatch titleMatch) throws SQLException {
+    Filter filter = new Filter(url, urlMatch, title, titleMatch);
+    fid.saveFilter(filter);
+  }
 }

@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 public final class Pages {
   public enum Name {
-    read, unread, bookmarks, feeds;
+    read, unread, bookmarks, feeds, filters;
 
     public String activeMarker() {
       return "%" + name().toUpperCase(Locale.ENGLISH) + "_ACTIVE%";
@@ -21,6 +21,7 @@ public final class Pages {
   private static final Logger log = LogManager.getLogger();
   private static final String HEADER_TEMPLATE = getResource("html/header.html");
   private static final String FOOTER_TEMPLATE = getResource("html/footer.html");
+  private static final String EDIT_FILTER_TEMPLATE = getResource("html/edit-filter.html");
 
   public static String getResource(String name) {
     try (InputStream stream = Pages.class.getResourceAsStream(name)) {
@@ -51,5 +52,10 @@ public final class Pages {
     return FOOTER_TEMPLATE.replace("%FOOTERLINKS%",
       footerLinks);
   }
+
+  public static String editFilterTemplate() {
+    return EDIT_FILTER_TEMPLATE;
+  }
+
   private Pages() {}
 }

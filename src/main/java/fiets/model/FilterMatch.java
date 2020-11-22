@@ -3,6 +3,12 @@ package fiets.model;
 import java.util.regex.Pattern;
 
 public enum FilterMatch {
+  IGNORE {
+    @Override
+    public boolean matches(String pattern, String content) {
+      return false;
+    }
+  },
 	REGEX {
     @Override
     public boolean matches(String pattern, String content) {

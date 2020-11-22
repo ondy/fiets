@@ -52,3 +52,7 @@ body {
   border-bottom: 2px solid #ddd;
   margin-bottom: 5px;
 }
+
+#edit-filter-modal {
+  display: none;
+}

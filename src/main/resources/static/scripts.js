@@ -52,9 +52,30 @@ $('body')
   });
 })
 .on('click', '.post-actions .add-filter', function (evt) {
-  
+  var link = $(this).closest('.post').find("h3 a");
+  var url = link.attr('href');
+  var title = link.text();
+  $('#filter-url').val(url);
+  $('#filter-title').val(title);
+  $('#edit-filter-modal').modal();
 })
 ;
+
+$('#add-filter').click(function () {
+  var form = $('#edit-filter-modal form');
+  $.ajax({
+     type: 'POST',
+     url: '/add-filter',
+     data: form.serialize()
+  })
+  .done(function (data, textStatus, jqXHR) {
+      $('#edit-filter-modal').modal('hide');
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    console.log(textStatus + " - " + errorThrown);
+    alert(textStatus);
+  });
+});
 
 $('.bookmarklet').each(function () {
   var $a = $(this);
