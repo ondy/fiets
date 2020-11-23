@@ -26,25 +26,16 @@ public class FiltersHtmlView implements View<String> {
     StringBuilder sb = new StringBuilder()
         .append(Pages.headerTemplate(Pages.Name.filters, filters.size() + " filters",
             unreadCount, bookmarkCount))
-        .append("<ul class='list-group'>");
-    for (Filter f : filters) {
-      sb.append("<li class='list-group-item filter");
-      /*
-      if (!"OK".equals(f.getFeed().getLastStatus())) {
-        sb.append("  list-group-item-warning");
-      }*/
-      sb.append("'>")
-          .append(filter(f))
-          .append("</li>");
-    }
-    return sb.append("</ul>").append(
+        .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th>Title Match</th><th>Title</th></tr></thead><tbody>");
+    filters.forEach(f -> sb.append(filter(f)));
+    return sb.append("</tbody></table>").append(
         Pages.footerTemplate("")).toString();
   }
 
   private String filter(Filter f) {
     return String.format(
-        "%s %s %s %s",
-        f.getTitle(), f.getTitleMatch(), f.getUrl(), f.getUrlMatch());
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
+        f.getTitleMatch(), f.getTitle(), f.getUrlMatch(), f.getUrl());
   }
 
 }
