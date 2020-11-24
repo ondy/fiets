@@ -75,4 +75,14 @@ public class FilterDao {
     Filter filter = new Filter(url, urlMatch, title, titleMatch);
     return filter;
   }
+  
+  public void deleteFilter(long id) throws SQLException {
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      "DELETE FROM filter WHERE id=?")) {
+      ps.setLong(1, id);
+      ps.executeUpdate();
+    }
+    log.debug("Deleted filter with ID {}.", id);
+  }
 }
