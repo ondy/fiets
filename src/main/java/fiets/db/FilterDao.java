@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class FilterDao {
+  private static final Logger log = LogManager.getLogger();
 
   private Database db;
   private FeedDao fd;
@@ -85,6 +86,6 @@ public class FilterDao {
       ps.setLong(1, id);
       ps.executeUpdate();
     }
-    log.debug("Deleted filter with ID {}.", id);
+    log.info("Deleted filter with ID {}.", id);
   }
 }
