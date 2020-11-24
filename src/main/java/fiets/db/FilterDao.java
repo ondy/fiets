@@ -25,7 +25,8 @@ public class FilterDao {
 
   private int createTable() throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "CREATE TABLE IF NOT EXISTS filter ("        
+      "CREATE TABLE IF NOT EXISTS filter ("
+        + "id BIGINT PRIMARY KEY AUTO_INCREMENT,"
         + "feed BIGINT,"
         + "url VARCHAR(2048),"
         + "urlmatch TINYINT,"
@@ -56,7 +57,7 @@ public class FilterDao {
   public List<Filter> getAllFilters() throws SQLException {
     List<Filter> filters = new ArrayList<>();
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "SELECT feed, url, urlmatch, title, titlematch FROM filter")) {
+      "SELECT id, url, urlmatch, title, titlematch FROM filter")) {
       ResultSet rs = ps.executeQuery();
       while (rs.next()) {
         filters.add(parseFilterResultSet(rs));
@@ -67,13 +68,12 @@ public class FilterDao {
 
   private Filter parseFilterResultSet(ResultSet rs) throws SQLException {
     int i = 0;
-    long feedId = rs.getLong(++i);
+    long id = rs.getLong(++i);
     String url = rs.getString(++i);
     FilterMatch urlMatch = FilterMatch.values()[(rs.getInt(++i))];
     String title = rs.getString(++i);
     FilterMatch titleMatch = FilterMatch.values()[rs.getInt(++i)];
-    Optional<Feed> feed = fd.getFeed(feedId);
-    Filter filter = new Filter(url, urlMatch, title, titleMatch);
+    Filter filter = new Filter(id, url, urlMatch, title, titleMatch);
     return filter;
   }
   
