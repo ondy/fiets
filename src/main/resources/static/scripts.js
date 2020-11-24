@@ -54,7 +54,7 @@ $('body')
 .on('click', '.post-actions .add-filter', function (evt) {
   var link = $(this).closest('.post').find("h3 a");
   var url = link.attr('href');
-  var title = link.text();
+  var title = link.attr('title');
   $('#filter-url').val(url);
   $('#filter-title').val(title);
   $('#add-filter').show();
