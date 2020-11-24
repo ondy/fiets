@@ -4,6 +4,7 @@ import fiets.model.Feed;
 import fiets.model.Filter;
 import fiets.model.FilterMatch;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
