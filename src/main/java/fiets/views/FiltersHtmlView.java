@@ -34,7 +34,7 @@ public class FiltersHtmlView implements View<String> {
 
   private String filter(Filter f) {
     return String.format(
-        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td class='filter-actions'>"
+        "<tr><td class='url-match'>%s</td><td class='url'>%s</td><td class='title-match'>%s</td><td class='title'>%s</td><td class='filter-actions'>"
         + "<button class='btn btn-sm btn-light edit-filter'>Edit</button>"
         + "<a href='%s' class='btn btn-sm btn-danger delete-filter'>Delete</a></td></tr>",
         f.getUrlMatch(), f.getUrl(), f.getTitleMatch(), f.getTitle(), deleteFilterLink(f));
