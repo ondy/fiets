@@ -57,6 +57,24 @@ $('body')
   var title = link.text();
   $('#filter-url').val(url);
   $('#filter-title').val(title);
+  $('#add-filter').show();
+  $('#edit-filter').hide();
+  $('#edit-filter-modal').modal();
+})
+.on('click', '.filter-actions .edit-filter', function (evt) {
+  var row = $(this).closest('tr');
+  var id = row.data('id');
+  var url = row.find('.url').text();
+  var urlMatch = row.find('.url-match').text();
+  var title = row.find('.title').text();
+  var titleMatch = row.find('.title-match').text();
+  $('#filter-id').val(id);
+  $('#filter-url').val(url);
+  $('#filter-url-match').val(urlMatch);
+  $('#filter-title').val(title);
+  $('#filter-title-match').val(titleMatch);
+  $('#edit-filter').show();
+  $('#add-filter').hide();
   $('#edit-filter-modal').modal();
 })
 ;
@@ -76,7 +94,21 @@ $('#add-filter').click(function () {
     alert(textStatus);
   });
 });
-
+$('#edit-filter').click(function () {
+  var form = $('#edit-filter-modal form');
+  $.ajax({
+     type: 'POST',
+     url: '/edit-filter',
+     data: form.serialize()
+  })
+  .done(function (data, textStatus, jqXHR) {
+      $('#edit-filter-modal').modal('hide');
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    console.log(textStatus + " - " + errorThrown);
+    alert(textStatus);
+  });
+});
 $('.bookmarklet').each(function () {
   var $a = $(this);
   var href = $a.attr("href");
