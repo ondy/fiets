@@ -163,6 +163,14 @@ public enum PathMatch {
       fs.addFilter(url, urlMatch, title, titleMatch);
       return new JsonView(Server.jsonOk());
     }
+  },
+  deleteFilter("delete-filter") {
+    @Override public View<PathMatch> serve(
+      SessionDecorator sd, FeedService fs) 
+      throws SQLException {
+      fs.deleteFilter(sd.longParam("id"));
+      return new RedirectView(PathMatch.showFilters);
+    }
   };
 
   private String base;
