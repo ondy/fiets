@@ -186,4 +186,9 @@ public class FeedService {
     Filter filter = new Filter(url, urlMatch, title, titleMatch);
     fid.saveFilter(filter);
   }
+  
+  public void deleteFilter(long filterId) throws SQLException {
+    fid.deleteFilter(filterId);
+  }
+
 }
