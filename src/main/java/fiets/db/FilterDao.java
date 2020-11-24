@@ -63,7 +63,7 @@ public class FilterDao {
       ps.setInt(2, filter.getUrlMatch().ordinal());
       ps.setString(3, filter.getTitle());
       ps.setInt(4, filter.getTitleMatch().ordinal());
-      ps.setInt(5, filter.getId());
+      ps.setLong(5, filter.getId());
       ps.executeUpdate();
     }
     return filter;  
