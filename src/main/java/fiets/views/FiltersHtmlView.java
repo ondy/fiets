@@ -26,7 +26,7 @@ public class FiltersHtmlView implements View<String> {
     StringBuilder sb = new StringBuilder()
         .append(Pages.headerTemplate(Pages.Name.filters, filters.size() + " filters",
             unreadCount, bookmarkCount))
-        .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th>Title Match</th><th>Title</th></tr></thead><tbody>");
+        .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th>Title Match</th><th>Title</th><th>Actions</th></tr></thead><tbody>");
     filters.forEach(f -> sb.append(filter(f)));
     return sb.append("</tbody></table>").append(
         Pages.footerTemplate("")).toString();
@@ -34,8 +34,11 @@ public class FiltersHtmlView implements View<String> {
 
   private String filter(Filter f) {
     return String.format(
-        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",
-        f.getTitleMatch(), f.getTitle(), f.getUrlMatch(), f.getUrl());
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td><a href='%s' class='btn btn-sm btn-danger delete-filter'>Delete</a></td></tr>",
+        f.getTitleMatch(), f.getTitle(), f.getUrlMatch(), f.getUrl(), deleteFilterLink(f));
   }
 
+  private String deleteFilterLink(Filter f) {
+    return "/delete-filter?id=" + f.getId();
+  }
 }
