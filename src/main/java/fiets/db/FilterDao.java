@@ -56,6 +56,21 @@ public class FilterDao {
     return filter;  
   }
 
+  public Filter updateFilter(Filter filter) throws SQLException {
+    try (PreparedStatement ps = db.getConnection().prepareStatement(
+      "UPDATE filter SET url=?, urlMatch=?, title=?, titleMatch=? WHERE id=?")) {
+      ps.setString(1, filter.getUrl());
+      ps.setInt(2, filter.getUrlMatch().ordinal());
+      ps.setString(3, filter.getTitle());
+      ps.setInt(4, filter.getTitleMatch().ordinal());
+      ps.setInt(5, filter.getId());
+      ps.executeUpdate();
+    }
+    return filter;  
+  }
+
+
+  
   public List<Filter> getAllFilters() throws SQLException {
     List<Filter> filters = new ArrayList<>();
     try (PreparedStatement ps = db.getConnection().prepareStatement(
