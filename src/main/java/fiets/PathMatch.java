@@ -164,6 +164,19 @@ public enum PathMatch {
       return new JsonView(Server.jsonOk());
     }
   },
+  editFilter("edit-filter") {
+    @Override public View<?> serve(SessionDecorator sd, FeedService fs)
+            throws Exception {
+      Map<String, List<String>> post = sd.postParameters();
+      Long id = Long.parseLong(post.get("id").get(0));
+      String url = post.get("url").get(0);
+      FilterMatch urlMatch = FilterMatch.valueOf(post.get("urlMatch").get(0));
+      String title = post.get("title").get(0);
+      FilterMatch titleMatch = FilterMatch.valueOf(post.get("titleMatch").get(0));
+      fs.updateFilter(id, url, urlMatch, title, titleMatch);
+      return new JsonView(Server.jsonOk());
+    }
+  },
   deleteFilter("delete-filter") {
     @Override public View<PathMatch> serve(
       SessionDecorator sd, FeedService fs) 
