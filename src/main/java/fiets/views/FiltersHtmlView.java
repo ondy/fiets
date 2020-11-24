@@ -28,8 +28,9 @@ public class FiltersHtmlView implements View<String> {
             unreadCount, bookmarkCount))
         .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th>Title Match</th><th>Title</th><th>Actions</th></tr></thead><tbody>");
     filters.forEach(f -> sb.append(filter(f)));
-    return sb.append("</tbody></table>").append(
-        Pages.footerTemplate("")).toString();
+    return sb.append("</tbody></table>")
+      .append(Pages.editFilterTemplate())
+      .append(Pages.footerTemplate("")).toString();
   }
 
   private String filter(Filter f) {
