@@ -59,17 +59,17 @@ public class PostsHtmlView implements View<String> {
   }
 
   private String addFilterLink(Post p) {
-    return "<button type='button' class='btn btn-link btn-sm add-filter'>+ Filter</button>";
+    return "<button type='button' class='btn btn-link btn-sm add-filter'>+Filter</button>";
   }
 
   private String bookmarkLink(Post p) {
     return String.format(
-      "<a href='%s' class='add-bookmark btn btn-link btn-sm' role='button'>+ Bookmark</a>",
+      "<a href='%s' class='add-bookmark btn btn-link btn-sm' role='button'>+Bookmark</a>",
       bookmarkUrl(p.getId()));
   }
   private String removeBookmarkLink(Post p) {
     return String.format(
-      "<a href='%s' class='remove-bookmark btn btn-link btn-sm' role='button'>- bookmark</a>",
+      "<a href='%s' class='remove-bookmark btn btn-link btn-sm' role='button'>-Bookmark</a>",
       removeBookmarkUrl(p.getId()));
   }
 
