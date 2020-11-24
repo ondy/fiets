@@ -183,7 +183,7 @@ public class FeedService {
   }
 
   public void addFilter(String url, FilterMatch urlMatch, String title, FilterMatch titleMatch) throws SQLException {
-    Filter filter = new Filter(url, urlMatch, title, titleMatch);
+    Filter filter = new Filter(0l, url, urlMatch, title, titleMatch);
     fid.saveFilter(filter);
   }
   
