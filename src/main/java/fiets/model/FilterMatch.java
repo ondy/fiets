@@ -10,8 +10,8 @@ public enum FilterMatch {
     }
 	
     @Override
-    public String displayText(String target) {
-	  return String.format("ignore %s", target);
+    public String displayText(String type, String value) {
+	  return String.format("ignore %s", type);
     }
   },
 	REGEX("matches regex") {
@@ -47,7 +47,7 @@ public enum FilterMatch {
 
   public abstract boolean matches(String pattern, String content);
 
-  public String displayText(String target) {
-	  return String.format("%s %s", target, text);
+  public String displayText(String type, String value) {
+	  return String.format("%s %s %s", type, text, value);
   }
 }
