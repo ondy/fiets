@@ -11,7 +11,7 @@ public enum FilterMatch {
 	
     @Override
     public String displayText(String type, String value) {
-	  return String.format("ignore %s", type);
+	  return String.format("%s is ignored", type);
     }
   },
 	REGEX("matches regex") {
