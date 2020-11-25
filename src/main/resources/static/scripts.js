@@ -64,10 +64,10 @@ $('body')
 .on('click', '.filter-actions .edit-filter', function (evt) {
   var row = $(this).closest('ul');
   var id = row.data('id');
-  var url = row.find('.url').text();
-  var urlMatch = row.find('.url-match').text();
-  var title = row.find('.title').text();
-  var titleMatch = row.find('.title-match').text();
+  var url = row.find('.url').val();
+  var urlMatch = row.find('.url-match').val();
+  var title = row.find('.title').val();
+  var titleMatch = row.find('.title-match').val();
   $('#filter-id').val(id);
   $('#filter-url').val(url);
   $('#filter-url-match').val(urlMatch);
