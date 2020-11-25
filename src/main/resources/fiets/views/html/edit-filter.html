@@ -11,10 +11,6 @@
         <form>
 	  <input type="hidden" name="id" id="filter-id" value="-1"/>
           <div class="form-group">
-            <label for="filter-url" class="col-form-label">URL:</label>
-            <input type="text" class="form-control" id="filter-url" name="url">
-          </div>
-          <div class="form-group">
             <label for="filter-url-match" class="col-form-label">URL Match:</label>
             <select class="form-control" id="filter-url-match" name="urlMatch">
               <option value="IGNORE" selected="selected">Ignore</option>
@@ -25,9 +21,10 @@
 		    </select>
           </div>
           <div class="form-group">
-            <label for="filter-title" class="col-form-label">Title:</label>
-            <input type="text" class="form-control" id="filter-title" name="title">
+            <label for="filter-url" class="col-form-label">URL:</label>
+            <input type="text" class="form-control" id="filter-url" name="url">
           </div>
+
           <div class="form-group">
             <label for="filter-title-match" class="col-form-label">Title Match:</label>
             <select class="form-control" id="filter-title-match" name="titleMatch">
@@ -38,7 +35,11 @@
 		      <option value="REGEX">Regex</option>
 		    </select>
           </div>
-        </form>
+          <div class="form-group">
+            <label for="filter-title" class="col-form-label">Title:</label>
+            <input type="text" class="form-control" id="filter-title" name="title">
+          </div>
+	</form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
