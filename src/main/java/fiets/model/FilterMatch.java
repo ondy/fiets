@@ -6,7 +6,7 @@ public enum FilterMatch {
   IGNORE {
     @Override
     public boolean matches(String pattern, String content) {
-      return false;
+      return true;
     }
   },
 	REGEX {
