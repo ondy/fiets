@@ -62,7 +62,7 @@ $('body')
   $('#edit-filter-modal').modal();
 })
 .on('click', '.filter-actions .edit-filter', function (evt) {
-  var row = $(this).closest('tr');
+  var row = $(this).closest('ul');
   var id = row.data('id');
   var url = row.find('.url').text();
   var urlMatch = row.find('.url-match').text();
