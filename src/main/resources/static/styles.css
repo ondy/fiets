@@ -19,10 +19,7 @@ body {
 .post, .feed {
   position: relative;
 }
-.feed-actions {
-  float: right;
-}
-.post-actions {
+.feed-actions, .filter-actions, .post-actions {
   float: right;
 }
 
