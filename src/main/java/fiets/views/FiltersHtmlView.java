@@ -35,10 +35,16 @@ public class FiltersHtmlView implements View<String> {
 
   private String filter(Filter f) {
     return String.format(
-        "<li class='list-group-item filter' data-id='%d'>%s and %s<span class='filter-actions'>"
+        "<li class='list-group-item filter' data-id='%d'>"
+        + "<input type='hidden' class='url' value='%s'/>"
+        + "<input type='hidden' class='url-match' value='%s'/>"
+        + "<input type='hidden' class='title' value='%s'/>"
+        + "<input type='hidden' class='title-match' value='%s'/>"
+        + "%s and %s<span class='filter-actions'>"
         + "<button class='btn btn-sm btn-light edit-filter'>Edit</button>"
         + "<a href='%s' class='btn btn-sm btn-danger delete-filter'>Delete</a></span></li>",
-        f.getId(), f.getUrlMatch().displayText("URL", f.getUrl()), f.getTitleMatch().displayText("title", f.getTitle()), deleteFilterLink(f));
+        f.getId(), f.getUrl(), f.getUrlMatch(), f.getTitle(), f.getTitleMatch(),
+        f.getUrlMatch().displayText("URL", f.getUrl()), f.getTitleMatch().displayText("title", f.getTitle()), deleteFilterLink(f));
   }
 
   private String deleteFilterLink(Filter f) {
