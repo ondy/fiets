@@ -26,7 +26,7 @@ public class FiltersHtmlView implements View<String> {
     StringBuilder sb = new StringBuilder()
         .append(Pages.headerTemplate(Pages.Name.filters, filters.size() + " filters",
             unreadCount, bookmarkCount))
-        .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th>Title Match</th><th>Title</th><th>Actions</th></tr></thead><tbody>");
+        .append("<table class='table'><thead><tr><th>URL Match</th><th>URL</th><th></th><th>Title Match</th><th>Title</th><th>Actions</th></tr></thead><tbody>");
     filters.forEach(f -> sb.append(filter(f)));
     return sb.append("</tbody></table>")
       .append(Pages.editFilterTemplate())
@@ -35,7 +35,7 @@ public class FiltersHtmlView implements View<String> {
 
   private String filter(Filter f) {
     return String.format(
-        "<tr data-id='%d'><td class='url-match'>%s</td><td class='url'>%s</td><td class='title-match'>%s</td><td class='title'>%s</td><td class='filter-actions'>"
+        "<tr data-id='%d'><td class='url-match'>%s</td><td class='url'>%s</td><td>and</td><td class='title-match'>%s</td><td class='title'>%s</td><td class='filter-actions'>"
         + "<button class='btn btn-sm btn-light edit-filter'>Edit</button>"
         + "<a href='%s' class='btn btn-sm btn-danger delete-filter'>Delete</a></td></tr>",
         f.getId(), f.getUrlMatch(), f.getUrl(), f.getTitleMatch(), f.getTitle(), deleteFilterLink(f));
