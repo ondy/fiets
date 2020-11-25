@@ -17,10 +17,8 @@ public class Filterer {
 
   public boolean isAllowed(Post post) {
     for (Filter f : filters) {
-      if (f.getTitleMatch().matches(f.getTitle(), post.getTitle())) {
-        return false;
-      }
-      if (f.getUrlMatch().matches(f.getUrl(), post.getLocation())) {
+      if (f.getTitleMatch().matches(f.getTitle(), post.getTitle())
+         && f.getUrlMatch().matches(f.getUrl(), post.getLocation())) {
         return false;
       }
     }
