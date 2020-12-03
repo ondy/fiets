@@ -33,7 +33,8 @@ public class FilterDao {
         + "url VARCHAR(2048),"
         + "urlmatch TINYINT,"
         + "title VARCHAR(2048),"
-        + "titlematch TINYINT"
+        + "titlematch TINYINT,"
+        + "matchcount BIGINT DEFAULT 0"
       + ");")) {
       return ps.executeUpdate();
     }
@@ -56,7 +57,7 @@ public class FilterDao {
     return filter;  
   }
 
-  public Filter updateFilter(Filter filter) throws SQLException {
+  public Filter updateFilterKeepMatchCount(Filter filter) throws SQLException {
     try (PreparedStatement ps = db.getConnection().prepareStatement(
       "UPDATE filter SET url=?, urlMatch=?, title=?, titleMatch=? WHERE id=?")) {
       ps.setString(1, filter.getUrl());
@@ -74,7 +75,7 @@ public class FilterDao {
   public List<Filter> getAllFilters() throws SQLException {
     List<Filter> filters = new ArrayList<>();
     try (PreparedStatement ps = db.getConnection().prepareStatement(
-      "SELECT id, url, urlmatch, title, titlematch FROM filter")) {
+      "SELECT id, url, urlmatch, title, titlematch, matchcount FROM filter")) {
       ResultSet rs = ps.executeQuery();
       while (rs.next()) {
         filters.add(parseFilterResultSet(rs));
@@ -90,7 +91,8 @@ public class FilterDao {
     FilterMatch urlMatch = FilterMatch.values()[(rs.getInt(++i))];
     String title = rs.getString(++i);
     FilterMatch titleMatch = FilterMatch.values()[rs.getInt(++i)];
-    Filter filter = new Filter(id, url, urlMatch, title, titleMatch);
+    long matchCount = rs.getLong(++i);
+    Filter filter = new Filter(id, url, urlMatch, title, titleMatch, matchCount);
     return filter;
   }
   
@@ -102,5 +104,22 @@ public class FilterDao {
       ps.executeUpdate();
     }
     log.info("Deleted filter with ID {}.", id);
+  }
+
+  public void updateMatchCount(Filter f) throws SQLException {
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+            "UPDATE filter SET matchcount=? WHERE id=?")) {
+      ps.setLong(1, f.getMatchCount());
+      ps.setLong(2, f.getId());
+      ps.executeUpdate();
+    }
+    log.debug("Increased match count for filter with ID {} to {}.", f.getId(), f.getMatchCount());
+  }
+
+  public void updateMatchCounts(List<Filter> filters) throws SQLException {
+    for (Filter filter : filters) {
+      updateMatchCount(filter);
+    }
   }
 }

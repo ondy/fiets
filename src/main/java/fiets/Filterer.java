@@ -19,6 +19,7 @@ public class Filterer {
     for (Filter f : filters) {
       if (f.getTitleMatch().matches(f.getTitle(), post.getTitle())
          && f.getUrlMatch().matches(f.getUrl(), post.getLocation())) {
+        f.incMatchCount();
         return false;
       }
     }

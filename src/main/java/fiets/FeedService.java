@@ -183,13 +183,13 @@ public class FeedService {
   }
 
   public void addFilter(String url, FilterMatch urlMatch, String title, FilterMatch titleMatch) throws SQLException {
-    Filter filter = new Filter(0l, url, urlMatch, title, titleMatch);
+    Filter filter = new Filter(0L, url, urlMatch, title, titleMatch, 0L);
     fid.saveFilter(filter);
   }
   
   public void updateFilter(long id, String url, FilterMatch urlMatch, String title, FilterMatch titleMatch) throws SQLException {
-    Filter filter = new Filter(id, url, urlMatch, title, titleMatch);
-    fid.updateFilter(filter);
+    Filter filter = new Filter(id, url, urlMatch, title, titleMatch, 0L);
+    fid.updateFilterKeepMatchCount(filter);
   }
   
   public void deleteFilter(long filterId) throws SQLException {
