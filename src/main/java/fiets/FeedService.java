@@ -75,6 +75,7 @@ public class FeedService {
         log.error("Could not update posts for {}.", feed.getLocation(), e);
       }
     }
+    fid.updateMatchCounts(allFilters);
   }
 
   public Set<Long> getBookmarks() throws SQLException {
