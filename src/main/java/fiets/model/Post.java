@@ -25,6 +25,10 @@ public class Post implements HasId {
     this(theId, from.location, from.date, 
       from.title, from.snippet, from.read, from.feed);
   }
+  public Post(boolean theRead, Post from) {
+    this(from.id, from.location, from.date,
+            from.title, from.snippet, theRead, from.feed);
+  }
 
   public String getLocation() {
     return location;

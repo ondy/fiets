@@ -31,7 +31,7 @@ public class FacebookProcessor implements FeedProcessor {
   }
 
   @Override public List<Post> parsePosts(
-          Feed feed, String content, Filterer ff) {
+          Feed feed, String content) {
     List<Post> result = new ArrayList<>();
     Set<String> doubleUrlsInOneTake = new HashSet<>();
     Jerry jerry = Jerry.jerry(content);
@@ -43,11 +43,9 @@ public class FacebookProcessor implements FeedProcessor {
         int len = parent.text().length();
         if (len > 100) {
           Post p = createPost(title, parent, feed);
-          if (ff.isAllowed(p)) {
-            if (!doubleUrlsInOneTake.contains(p.getLocation())) {
-              result.add(p);
-              doubleUrlsInOneTake.add(p.getLocation());
-            }
+          if (!doubleUrlsInOneTake.contains(p.getLocation())) {
+            result.add(p);
+            doubleUrlsInOneTake.add(p.getLocation());
           }
           break;
         }

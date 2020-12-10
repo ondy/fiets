@@ -49,7 +49,7 @@ public class AtomFeedProcessor implements FeedProcessor {
   }
 
   @Override public List<Post> parsePosts(
-    Feed feed, String content, Filterer ff)
+    Feed feed, String content)
     throws XPathExpressionException, SAXException,
       IOException, ParserConfigurationException, ParseException {
     Document doc = Dom.parse(content);
@@ -66,9 +66,7 @@ public class AtomFeedProcessor implements FeedProcessor {
             .map(dateString -> Xml.parseDate(dateString))
             .orElse(new Date());
         Post post = new Post(0l, link, date, title, description, false, feed);
-        if (ff.isAllowed(post)) {
-          result.add(post);
-        }
+        result.add(post);
       }
     }
     return result;

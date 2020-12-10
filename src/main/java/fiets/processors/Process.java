@@ -26,10 +26,9 @@ public class Process {
     PROCESS.register(new FacebookProcessor());
   }
 
-  public static List<Post> parsePosts(
-    Feed feed, Filterer ff) throws Exception {
+  public static List<Post> parsePosts(Feed feed) throws Exception {
     String input = PROCESS.preprocess(feed);
-    return PROCESS.getParser(feed, input).parsePosts(feed, input, ff);
+    return PROCESS.getParser(feed, input).parsePosts(feed, input);
   }
 
   public static String parseTitle(Feed feed) throws Exception {

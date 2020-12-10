@@ -52,16 +52,13 @@ public class TwitterProcessor implements FeedProcessor {
     }
   }
 
-  @Override public List<Post> parsePosts(Feed feed, String content,
-    Filterer ff) throws Exception {
+  @Override public List<Post> parsePosts(Feed feed, String content) throws Exception {
     Twitter tw = initTwitter(feed);
     ResponseList<Status> timeline = tw.getHomeTimeline(new Paging(1, 50));
     List<Post> result = new ArrayList<>();
     for (Status status : timeline) {
       Post post = toPost(feed, status);
-      if (ff.isAllowed(post)) {
-        result.add(post);
-      }
+      result.add(post);
     }
     return result;
   }

@@ -42,7 +42,7 @@ public class RssFeedProcessor implements FeedProcessor {
   }
 
   @Override public List<Post> parsePosts(
-    Feed feed, String content, Filterer ff)
+    Feed feed, String content)
     throws XPathExpressionException, SAXException,
       IOException, ParserConfigurationException {
     Document doc = Dom.parse(content);
@@ -62,9 +62,7 @@ public class RssFeedProcessor implements FeedProcessor {
             .map(Xml::parseDate)
             .orElse(new Date());
         Post post = new Post(0L, link, date, title, description, false, feed);
-        if (ff.isAllowed(post)) {
-          result.add(post);
-        }
+        result.add(post);
       }
     }
     return result;

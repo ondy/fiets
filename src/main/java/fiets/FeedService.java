@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import fiets.model.*;
 import org.apache.logging.log4j.LogManager;
@@ -68,7 +69,16 @@ public class FeedService {
     Filterer ff = new Filterer(allFilters);
     for (Feed feed : feeds) {
       try {
-        pd.savePosts(Process.parsePosts(feed, ff), feed);
+        List<Post> posts = Process.parsePosts(feed);
+        posts.stream()
+          .map(p -> {
+            if (ff.isAllowed(p)) {
+              return p;
+            } else {
+              return new Post(true, p);
+            }
+          }).collect(Collectors.toList());
+        pd.savePosts(posts, feed);
         fed.touchFeed(feed, "OK");
       } catch (Exception e) {
         fed.touchFeed(feed, e.getMessage());
