@@ -70,7 +70,7 @@ public class FeedService {
     for (Feed feed : feeds) {
       try {
         List<Post> posts = Process.parsePosts(feed);
-        posts.stream()
+        posts = posts.stream()
           .map(p -> {
             if (ff.isAllowed(p)) {
               return p;
