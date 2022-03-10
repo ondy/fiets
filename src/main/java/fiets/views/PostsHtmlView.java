@@ -82,8 +82,8 @@ public class PostsHtmlView implements View<String> {
     if (unread == 0) {
       return "";
     } else {
-      return String.format("<a href='%s'><small>Mark %d read</small></a>",
-        markReadUrl(), unread);
+      return String.format("<a href='%s'><small>Mark %d of %d read</small></a>",
+        markReadUrl(), unread, unreadCount);
     }
   }
 
