@@ -18,9 +18,9 @@ import fiets.model.Feed;
 import fiets.model.Post;
 
 /**
- * A post is considered equal to an existing one if both location and title are
- * the same. A post with the same location but a different title is an updated
- * version.
+ * A post is considered equal to an existing one when either the location or the
+ * title matches. Only when both the location and the title differ is a post
+ * treated as new.
  */
 public class PostDao {
 
@@ -64,23 +64,35 @@ public class PostDao {
     if (post.getId() == 0L) {
       Post existing = loadPostByLocation(post.getLocation());
       if (existing == null) {
+        existing = loadPostByTitle(post.getTitle());
+      }
+      if (existing == null) {
         post = insertPost(post);
       } else {
-        if (post.getTitle().equals(existing.getTitle())) {
-          post = existing;
-          log.debug("Post {} already exists with ID {}.",
-            post.getLocation(), post.getId());
-          touchPost(post);
-        } else {
-          post = new Post(existing.getId(), post);
-          updatePostById(post);
-        }
+        post = existing;
+        log.debug("Post {} already exists with ID {}.",
+          post.getLocation(), post.getId());
+        touchPost(post);
       }
     } else {
       updatePostById(post);
     }
     savePostFeed(post, feed);
     return post;
+  }
+
+  private Post loadPostByTitle(String title) throws SQLException {
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      selectPost("WHERE post.title=?"))) {
+      ps.setString(1, title);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (!rs.next()) {
+          return null;
+        }
+        return parsePostResultSet(rs);
+      }
+    }
   }
 
   public void savePosts(List<Post> posts, Feed feed) throws SQLException {
