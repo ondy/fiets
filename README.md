@@ -10,7 +10,6 @@ Quickstart.
 ## Features
 * Fetch any number of feeds on a regular base and store posts in a unified stream.
 * Supports RSS and Atom format.
-* Fetch your personal Twitter feed.
 * Bookmark posts for later reading.
 * Fever API emulation. (As far as needed to make it work with the Reeder app.)
 * Extend _fiets_ with custom Java classes:
@@ -53,21 +52,6 @@ You can add feeds manually by calling the URL:
 * `<feed-url>` has to point to a supported feed format.
 * `<feed-url>` must be URL encoded. If you call add-feed from a browser, 
 it should be just fine.
-
-#### Add Twitter Timeline
-Fiets is able to embed your Twitter timeline as a feed. For this, you need to
-register your fiets instance as an app in your Twitter account (you probably
-need to apply for a developer account first).
-
-Then you need the OAuth token+secret as well as consumer key+secret from your
-registered app and create the artificial URL:
-
-    twitter://?consumerKey=<consumer-key>&comsumerSecret=<consumer-secret>&token=<token>&tokenSecret=<token-secret>
-
-Register this URL as feed and you are done.
-
-Note: Do not give away this URL as it provides full access to your Twitter
-account.
 
 ### From Source 
 If you prefer to build from the current source:
