@@ -12,6 +12,8 @@ import fiets.model.*;
 import fiets.views.*;
 import fiets.views.Pages.Name;
 import jodd.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public enum PathMatch {
   showUnreadPosts("") {
@@ -50,11 +52,22 @@ public enum PathMatch {
     }
   },
   showBookmarks("bookmarks") {
-    @Override public View<String> serve(SessionDecorator sd, FeedService fs) 
-        throws SQLException {
-      List<Post> posts = fs.getBookmarkedPosts();
-      return new PostsHtmlView(
-        Name.bookmarks, posts, Server.getIds(posts), fs.getUnreadCount());
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs) {
+      List<Post> posts = Collections.emptyList();
+      Set<Long> bookmarkedIds = Collections.emptySet();
+      try {
+        posts = fs.getBookmarkedPosts();
+        bookmarkedIds = Server.getIds(posts);
+      } catch (SQLException e) {
+        log.warn("Could not load bookmarked posts.", e);
+      }
+      int unreadCount = -1;
+      try {
+        unreadCount = fs.getUnreadCount();
+      } catch (SQLException e) {
+        log.warn("Could not load unread count for bookmarks page.", e);
+      }
+      return new PostsHtmlView(Name.bookmarks, posts, bookmarkedIds, unreadCount);
     }
   },
   addBookmark("add-bookmark") {
@@ -185,6 +198,8 @@ public enum PathMatch {
       return new RedirectView(PathMatch.showFilters);
     }
   };
+
+  private static final Logger log = LogManager.getLogger();
 
   private String base;
 
