@@ -9,6 +9,8 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fiets.DeploymentInfo;
+
 public final class Pages {
   public enum Name {
     read, unread, bookmarks, feeds, filters;
@@ -38,6 +40,7 @@ public final class Pages {
     String title, int unread, int bookmarks) {
     return HEADER_TEMPLATE
       .replace("%TITLE%", title)
+      .replace("%DEPLOYMENT_INFO%", DeploymentInfo.getDisplayText())
       .replace("%UNREAD_COUNT%",
         unread == -1 ? "" : String.format(
           " (<span class='unread-count'>%d</span>)", unread))

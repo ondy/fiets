@@ -53,3 +53,9 @@ body {
 #edit-filter-modal {
   display: none;
 }
+
+.deployment-info {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-align: right;
+}
