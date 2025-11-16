@@ -1,12 +1,17 @@
 package fiets.views;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import fiets.model.Post;
 import fiets.views.Pages.Name;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PostsHtmlView implements View<String> {
+
+  private static final Logger log = LogManager.getLogger();
 
   private final List<Post> posts;
   private final int unreadCount;
@@ -17,8 +22,8 @@ public class PostsHtmlView implements View<String> {
     Name thePageName,
     List<Post> thePosts, Set<Long> theBookmarked, int theUnreadCount) {
     pageName = thePageName;
-    posts = thePosts;
-    bookmarked = theBookmarked;
+    posts = thePosts == null ? Collections.emptyList() : thePosts;
+    bookmarked = theBookmarked == null ? Collections.emptySet() : theBookmarked;
     unreadCount = theUnreadCount;
   }
 
@@ -31,12 +36,23 @@ public class PostsHtmlView implements View<String> {
       .append(header())
       .append("<ul class='list-group'>");
     for (Post p : posts) {
-      sb.append(post(p));
+      try {
+        sb.append(post(p));
+      } catch (RuntimeException e) {
+        log.warn(String.format("Could not render post %s", safePostId(p)), e);
+      }
     }
     return sb.append("</ul>")
             .append(Pages.editFilterTemplate())
             .append(Pages.footerTemplate(markReadLink()))
             .toString();
+  }
+
+  private static String safePostId(Post p) {
+    if (p == null) {
+      return "<unknown>";
+    }
+    return String.valueOf(p.getId());
   }
 
   private String post(Post p) {
