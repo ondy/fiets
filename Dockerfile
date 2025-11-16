@@ -1,13 +1,13 @@
-FROM gradle:5.3
+FROM gradle:5.3 AS build
 WORKDIR /src
 
 USER root
 RUN chown -R gradle:gradle /src
 USER gradle
 
-RUN git clone https://github.com/ondy/fiets ;\ 
-  cd fiets ;\
-  gradle build
+COPY --chown=gradle:gradle . /src/fiets
+WORKDIR /src/fiets
+RUN gradle build
 
 FROM adoptopenjdk/openjdk8:alpine-jre
 
@@ -20,7 +20,7 @@ RUN mkdir -p "$FIETS_HOME"; \
 USER fiets-user
 WORKDIR $FIETS_HOME
 
-COPY --from=0 --chown=fiets-user:fiets-user /src/fiets/build/libs/fiets-*.jar fiets.jar
+COPY --from=build --chown=fiets-user:fiets-user /src/fiets/build/libs/fiets-*.jar fiets.jar
 
 EXPOSE 7000
 CMD ["java", "-jar", "fiets.jar"]
