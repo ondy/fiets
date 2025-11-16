@@ -2,10 +2,12 @@ package fiets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 public final class DeploymentInfo {
   private static final Logger log = LogManager.getLogger();
   private static final String UNKNOWN = "unbekannt";
+  private static final String PROPERTIES_PATH = "/fiets/deployment-info.properties";
+  private static final Properties BUILD_PROPERTIES = loadBuildProperties();
   private static final String BRANCH = determineBranch();
   private static final String COMMIT_TIME = determineCommitTime();
 
@@ -30,6 +34,10 @@ public final class DeploymentInfo {
     if (!isBlank(value)) {
       return value.trim();
     }
+    value = getBuildProperty("branch");
+    if (!isBlank(value)) {
+      return value.trim();
+    }
     return runGitCommand("rev-parse", "--abbrev-ref", "HEAD");
   }
 
@@ -38,8 +46,16 @@ public final class DeploymentInfo {
     if (!isBlank(value)) {
       return value.trim();
     }
+    value = getBuildProperty("commitTime");
+    if (!isBlank(value)) {
+      return value.trim();
+    }
     return runGitCommand("log", "-1", "--format=%cd",
       "--date=format:%Y-%m-%d %H:%M:%S %z");
+  }
+
+  private static String getBuildProperty(String key) {
+    return BUILD_PROPERTIES.getProperty(key);
   }
 
   private static String runGitCommand(String... args) {
@@ -84,6 +100,19 @@ public final class DeploymentInfo {
 
   private static String defaultIfBlank(String value, String defaultValue) {
     return isBlank(value) ? defaultValue : value.trim();
+  }
+
+  private static Properties loadBuildProperties() {
+    Properties properties = new Properties();
+    try (InputStream inputStream = DeploymentInfo.class
+        .getResourceAsStream(PROPERTIES_PATH)) {
+      if (inputStream != null) {
+        properties.load(inputStream);
+      }
+    } catch (IOException e) {
+      log.warn("Could not read deployment info properties", e);
+    }
+    return properties;
   }
 
   private static boolean isBlank(String value) {
