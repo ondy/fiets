@@ -268,7 +268,8 @@ public class PostDao {
       try (ResultSet rs = ps.executeQuery()) {
         List<Post> posts = new ArrayList<>();
         while (rs.next()) {
-          posts.add(parsePostResultSet(rs));
+          long bookmarkedId = rs.getLong(1);
+          posts.add(parsePostResultSet(rs, 1, bookmarkedId));
         }
         return posts;
       }
@@ -287,6 +288,7 @@ public class PostDao {
 
   private static String selectBookmarkedPost(String appendix) {
     return "SELECT "
+      + "bookmarkedpost.post,"
       + "post.id,post.date,post.location,post.snippet,post.title,post.read,"
       + "feed.id,feed.location,feed.title,feed.lastAccess,feed.lastStatus "
       + "FROM bookmarkedpost "
@@ -297,8 +299,16 @@ public class PostDao {
   }
 
   private Post parsePostResultSet(ResultSet rs) throws SQLException {
-    int index = 0;
+    return parsePostResultSet(rs, 0, null);
+  }
+
+  private Post parsePostResultSet(ResultSet rs, int offset, Long fallbackId)
+      throws SQLException {
+    int index = offset;
     long id = rs.getLong(++index);
+    if (rs.wasNull() && fallbackId != null) {
+      id = fallbackId;
+    }
     Date date = rs.getTimestamp(++index);
     String location = rs.getString(++index);
     String snippet = rs.getString(++index);

@@ -40,6 +40,7 @@ public class PostsHtmlView implements View<String> {
         sb.append(post(p));
       } catch (RuntimeException e) {
         log.warn(String.format("Could not render post %s", safePostId(p)), e);
+        sb.append(errorPost(p));
       }
     }
     return sb.append("</ul>")
@@ -94,6 +95,9 @@ public class PostsHtmlView implements View<String> {
   }
 
   private String markReadLink() {
+    if (pageName == Name.bookmarks) {
+      return "";
+    }
     int unread = unreadCount();
     if (unread == 0) {
       return "";
@@ -130,6 +134,22 @@ public class PostsHtmlView implements View<String> {
 
   private String removeBookmarkUrl(long id) {
     return "/remove-bookmark?post=" + id;
+  }
+
+  private String errorPost(Post p) {
+    boolean bookmarkedPost = p != null && isBookmarked(p);
+    String classes = String.format(
+      "list-group-item post error%s",
+      bookmarkedPost ? " bookmarked" : "");
+    StringBuilder builder = new StringBuilder(String.format(
+      "<li class='%s'><small>Could not render post %s</small>",
+      classes, safePostId(p)));
+    if (bookmarkedPost) {
+      builder.append(" <span class='post-actions'>")
+             .append(removeBookmarkLink(p))
+             .append("</span>");
+    }
+    return builder.append("</li>").toString();
   }
 
   private String header() {
