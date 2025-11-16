@@ -137,10 +137,14 @@ public class PostsHtmlView implements View<String> {
   }
 
   private String errorPost(Post p) {
+    boolean bookmarkedPost = p != null && isBookmarked(p);
+    String classes = String.format(
+      "list-group-item post error%s",
+      bookmarkedPost ? " bookmarked" : "");
     StringBuilder builder = new StringBuilder(String.format(
-      "<li class='list-group-item post error'><small>Could not render post %s</small>",
-      safePostId(p)));
-    if (p != null) {
+      "<li class='%s'><small>Could not render post %s</small>",
+      classes, safePostId(p)));
+    if (bookmarkedPost) {
       builder.append(" <span class='post-actions'>")
              .append(removeBookmarkLink(p))
              .append("</span>");
