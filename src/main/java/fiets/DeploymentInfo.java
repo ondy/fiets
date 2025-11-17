@@ -5,8 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,14 +24,18 @@ public final class DeploymentInfo {
   private static final Properties BUILD_PROPERTIES = loadBuildProperties();
   private static final String BRANCH = determineBranch();
   private static final String COMMIT_TIME = determineCommitTime();
+  private static final ZoneId DISPLAY_ZONE = ZoneId.of("Europe/Berlin");
+  private static final DateTimeFormatter COMMIT_TIME_INPUT_FORMAT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z", Locale.ROOT);
+  private static final DateTimeFormatter COMMIT_TIME_OUTPUT_FORMAT =
+      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm z", Locale.GERMAN);
 
   private DeploymentInfo() {}
 
   public static String getDisplayText() {
     String branch = defaultIfBlank(BRANCH, UNKNOWN);
-    String commitTime = defaultIfBlank(COMMIT_TIME, UNKNOWN);
-    return String.format("Branch: %s • Letzter Commit: %s",
-      escape(branch), escape(commitTime));
+    String commitTime = formatCommitTime(defaultIfBlank(COMMIT_TIME, UNKNOWN));
+    return String.format("%s (%s)", escape(commitTime), escape(branch));
   }
 
   private static String determineBranch() {
@@ -113,6 +122,20 @@ public final class DeploymentInfo {
       log.warn("Could not read deployment info properties", e);
     }
     return properties;
+  }
+
+  private static String formatCommitTime(String commitTime) {
+    if (isBlank(commitTime) || UNKNOWN.equals(commitTime)) {
+      return UNKNOWN;
+    }
+    String trimmed = commitTime.trim();
+    try {
+      OffsetDateTime parsed = OffsetDateTime.parse(trimmed, COMMIT_TIME_INPUT_FORMAT);
+      return parsed.atZoneSameInstant(DISPLAY_ZONE).format(COMMIT_TIME_OUTPUT_FORMAT);
+    } catch (DateTimeParseException e) {
+      log.debug("Could not parse commit time '{}'", trimmed, e);
+      return trimmed;
+    }
   }
 
   private static boolean isBlank(String value) {
