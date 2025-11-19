@@ -34,6 +34,12 @@ public class FileView implements View<InputStream> {
       return "application/javascript";
     } else if (path.endsWith(".map")) {
       return "application/json";
+    } else if (path.endsWith(".png")) {
+      return "image/png";
+    } else if (path.endsWith(".ico")) {
+      return "image/x-icon";
+    } else if (path.endsWith(".webmanifest")) {
+      return "application/manifest+json";
     } else {
       throw new IllegalArgumentException("Unknown filetype to serve: " + path);
     }
