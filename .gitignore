@@ -16,5 +16,3 @@
 /fiets.mv.db
 /.gradle
 
-# Generated favicon/PWA icon assets
-src/main/resources/static/icons/
