@@ -1,3 +1,14 @@
+function getEditFilterModal() {
+  if (typeof bootstrap === 'undefined') {
+    return null;
+  }
+  var modalElement = document.getElementById('edit-filter-modal');
+  if (!modalElement) {
+    return null;
+  }
+  return bootstrap.Modal.getOrCreateInstance(modalElement);
+}
+
 setInterval(function () {
   $.ajax({
     dataType: "json",
@@ -59,7 +70,10 @@ $('body')
   $('#filter-title').val(title);
   $('#add-filter').show();
   $('#edit-filter').hide();
-  $('#edit-filter-modal').modal();
+  var modal = getEditFilterModal();
+  if (modal) {
+    modal.show();
+  }
 })
 .on('click', '.filter-actions .edit-filter', function (evt) {
   var row = $(this).closest('ul');
@@ -75,7 +89,10 @@ $('body')
   $('#filter-title-match').val(titleMatch);
   $('#edit-filter').show();
   $('#add-filter').hide();
-  $('#edit-filter-modal').modal();
+  var modal = getEditFilterModal();
+  if (modal) {
+    modal.show();
+  }
 })
 ;
 
@@ -87,7 +104,10 @@ $('#add-filter').click(function () {
      data: form.serialize()
   })
   .done(function (data, textStatus, jqXHR) {
-      $('#edit-filter-modal').modal('hide');
+      var modal = getEditFilterModal();
+      if (modal) {
+        modal.hide();
+      }
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
     console.log(textStatus + " - " + errorThrown);
@@ -102,7 +122,10 @@ $('#edit-filter').click(function () {
      data: form.serialize()
   })
   .done(function (data, textStatus, jqXHR) {
-      $('#edit-filter-modal').modal('hide');
+      var modal = getEditFilterModal();
+      if (modal) {
+        modal.hide();
+      }
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
     console.log(textStatus + " - " + errorThrown);
