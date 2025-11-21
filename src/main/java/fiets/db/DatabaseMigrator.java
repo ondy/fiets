@@ -219,10 +219,10 @@ public class DatabaseMigrator {
 
   private void ensurePublicSchema(Connection conn) throws SQLException {
     try (PreparedStatement create = conn.prepareStatement(
-      "CREATE SCHEMA IF NOT EXISTS PUBLIC")) {
+      "CREATE SCHEMA IF NOT EXISTS \"PUBLIC\"")) {
       create.execute();
     }
-    try (PreparedStatement set = conn.prepareStatement("SET SCHEMA PUBLIC")) {
+    try (PreparedStatement set = conn.prepareStatement("SET SCHEMA \"PUBLIC\"")) {
       set.execute();
     }
   }
