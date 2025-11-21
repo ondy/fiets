@@ -107,4 +107,5 @@ dependencies {
   implementation "org.nanohttpd:nanohttpd:[2,3["
   implementation "org.jsoup:jsoup:[1,2["
   implementation "com.syncthemall:boilerpipe:[1.2,1.3["
+  testImplementation "junit:junit:4.13.2"
 }
