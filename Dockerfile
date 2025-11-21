@@ -1,4 +1,4 @@
-FROM gradle:5.3 AS build
+FROM gradle:8.10.2-jdk21 AS build
 WORKDIR /src
 
 USER root
@@ -9,7 +9,7 @@ COPY --chown=gradle:gradle . /src/fiets
 WORKDIR /src/fiets
 RUN gradle build
 
-FROM adoptopenjdk/openjdk8:alpine-jre
+FROM eclipse-temurin:21-jre-alpine
 
 ENV FIETS_HOME /usr/local/fiets
 ENV PATH $FIETS_HOME/bin:$PATH
