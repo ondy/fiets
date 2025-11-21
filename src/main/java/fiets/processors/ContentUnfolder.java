@@ -89,7 +89,7 @@ public class ContentUnfolder {
   }
 
   private String extractFacebookArticle(String url, String html) {
-    Jerry jerry = Jerry.jerry(html);
+    Jerry jerry = Jerry.jerry().parse(html);
     return jerry.find("#contentArea").text();
   }
 

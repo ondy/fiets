@@ -27,14 +27,14 @@ public class FacebookProcessor implements FeedProcessor {
   }
 
   @Override public String parseTitle(Feed feed, String content) {
-    return "Facebook - " + Jerry.jerry(content).find("title").text();
+    return "Facebook - " + Jerry.jerry().parse(content).find("title").text();
   }
 
   @Override public List<Post> parsePosts(
           Feed feed, String content) {
     List<Post> result = new ArrayList<>();
     Set<String> doubleUrlsInOneTake = new HashSet<>();
-    Jerry jerry = Jerry.jerry(content);
+    Jerry jerry = Jerry.jerry().parse(content);
     int maxLevel = findMaxHLevel(jerry);
     Jerry titles = jerry.find("h" + maxLevel);
     titles.forEach(title -> {
