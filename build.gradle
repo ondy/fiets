@@ -89,6 +89,12 @@ jar {
   from('src/main/resources/static') {
     into 'static'
   }
+  from('build/assets') {
+    into 'META-INF/resources/static'
+  }
+  from('src/main/resources/static') {
+    into 'META-INF/resources/static'
+  }
 }
 
 repositories {

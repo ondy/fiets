@@ -28,7 +28,8 @@ public class FileView implements View<InputStream> {
   }
 
   private InputStream loadFromClasspath(String path) {
-    InputStream classpathStream = Server.class.getResourceAsStream("/" + path);
+    InputStream classpathStream =
+      Server.class.getClassLoader().getResourceAsStream(path);
     if (classpathStream != null) {
       return classpathStream;
     }
