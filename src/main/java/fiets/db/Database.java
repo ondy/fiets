@@ -23,7 +23,20 @@ public class Database implements AutoCloseable {
    */
   public Database() throws SQLException {
     new File("db").mkdir();
-    conn = DriverManager.getConnection("jdbc:h2:./db/fiets", "sa", "");
+    try {
+      conn = DriverManager.getConnection(
+        "jdbc:h2:./db/fiets;MODE=LEGACY;DATABASE_TO_LOWER=TRUE",
+        "sa", "");
+    } catch (SQLException ex) {
+      if (ex.getMessage() != null
+        && ex.getMessage().contains("Unsupported database file version")) {
+        throw new SQLException(
+          "Existing H2 database was created with 1.4.x. "
+            + "Run scripts/migrate-h2.sh to export and re-import it for H2 2.x.",
+          ex);
+      }
+      throw ex;
+    }
   }
 
   /**

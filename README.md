@@ -39,9 +39,20 @@ _public site make sure to run it behind a reverse proxy with authentication_
 _and HTTPS!_
 
 Database files are created in the current directory, log files below `logs`.
-To remain compatible with existing installations, _fiets_ ships with H2 1.4.200;
-if you previously ran a build that wrote the database with H2 2.x, delete the
-`db` directory or restore a backup created before the upgrade.
+_Fiets_ now runs on H2 2.x while keeping compatibility mode enabled to preserve
+existing schemas.
+
+If you are upgrading from an older release that still used H2 1.4.x, export the
+legacy database and re-import it with the included migration helper **before**
+starting the new jar:
+
+```
+./scripts/migrate-h2.sh [path/to/db/fiets]
+```
+
+The script downloads both H2 versions, writes an SQL export, keeps the legacy
+`db/fiets.mv.db` as a `.legacy` backup, and recreates the database in the 2.x
+file format without losing data.
 
 _Fiets_ immediately starts checking known feeds for updates. 
 
