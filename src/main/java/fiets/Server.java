@@ -40,7 +40,7 @@ public class Server extends NanoHTTPD {
     if (envPort != null && !envPort.isBlank()) {
       return Integer.parseInt(envPort.trim());
     }
-    return 7000;
+    return 8080;
   }
 
   private void scheduleNowAndEvery(Runnable r, long everyMillis) {

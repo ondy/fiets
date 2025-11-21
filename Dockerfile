@@ -24,5 +24,5 @@ WORKDIR $FIETS_HOME
 
 COPY --from=build --chown=fiets-user:fiets-user /src/fiets/build/libs/fiets-*.jar fiets.jar
 
-EXPOSE 7000
+EXPOSE 8080
 CMD ["java", "-jar", "fiets.jar"]
