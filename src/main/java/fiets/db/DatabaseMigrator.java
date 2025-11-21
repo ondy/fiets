@@ -283,15 +283,16 @@ public class DatabaseMigrator {
   }
 
   private void resetIdentitySequences(Connection conn) throws SQLException {
-    resetIdentitySequence(conn, "feed");
-    resetIdentitySequence(conn, "filter");
-    resetIdentitySequence(conn, "post");
+    resetIdentitySequence(conn, "FEED");
+    resetIdentitySequence(conn, "FILTER");
+    resetIdentitySequence(conn, "POST");
   }
 
   private void resetIdentitySequence(Connection conn, String table) throws SQLException {
+    String quotedTable = "\"" + table + "\"";
     long maxId;
     try (PreparedStatement ps = conn.prepareStatement(
-      "SELECT COALESCE(MAX(id), 0) FROM " + table)) {
+      "SELECT COALESCE(MAX(\"ID\"), 0) FROM " + quotedTable)) {
       try (ResultSet rs = ps.executeQuery()) {
         rs.next();
         maxId = rs.getLong(1);
@@ -299,7 +300,7 @@ public class DatabaseMigrator {
     }
     long nextId = maxId + 1;
     try (PreparedStatement ps = conn.prepareStatement(
-      "ALTER TABLE " + table + " ALTER COLUMN id RESTART WITH " + nextId)) {
+      "ALTER TABLE " + quotedTable + " ALTER COLUMN \"ID\" RESTART WITH " + nextId)) {
       ps.execute();
     }
   }
