@@ -8,6 +8,7 @@ import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.HttpStatus;
+import fiets.util.JerryFactory;
 import jodd.jerry.Jerry;
 
 public class ContentUnfolder {
@@ -89,7 +90,7 @@ public class ContentUnfolder {
   }
 
   private String extractFacebookArticle(String url, String html) {
-    Jerry jerry = Jerry.jerry().parse(html);
+    Jerry jerry = JerryFactory.parse(html);
     return jerry.find("#contentArea").text();
   }
 

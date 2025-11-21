@@ -3,6 +3,7 @@ package fiets.processors;
 import fiets.Filterer;
 import fiets.model.Feed;
 import fiets.model.Post;
+import fiets.util.JerryFactory;
 import jodd.jerry.Jerry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,14 +28,14 @@ public class FacebookProcessor implements FeedProcessor {
   }
 
   @Override public String parseTitle(Feed feed, String content) {
-    return "Facebook - " + Jerry.jerry().parse(content).find("title").text();
+    return "Facebook - " + JerryFactory.parse(content).find("title").text();
   }
 
   @Override public List<Post> parsePosts(
           Feed feed, String content) {
     List<Post> result = new ArrayList<>();
     Set<String> doubleUrlsInOneTake = new HashSet<>();
-    Jerry jerry = Jerry.jerry().parse(content);
+    Jerry jerry = JerryFactory.parse(content);
     int maxLevel = findMaxHLevel(jerry);
     Jerry titles = jerry.find("h" + maxLevel);
     titles.forEach(title -> {
