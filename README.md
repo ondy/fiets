@@ -30,7 +30,7 @@ Next, start _fiets_:
 
     java -jar fiets-0.11.jar
 
-By default it starts to listen at port 8080. You can choose an alternative port
+By default it starts to listen at port 7000. You can choose an alternative port
 as optional command line parameter or via the `PORT` environment variable (e.g.
 platforms that inject a port dynamically).
 
