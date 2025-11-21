@@ -60,16 +60,21 @@ public class PostsHtmlView implements View<String> {
     PostDisplay display = new PostDisplay(p);
     return String.format(
       "<li class='list-group-item post %s'>"
-      + "<small>%s</small> | <small>%s</small>"
+      + "<div class='post-meta'>"
+      + "<small class='post-date'>%s</small>"
+      + "<span class='meta-separator'>|</span>"
+      + "<small class='feed-title-full'>%s</small>"
+      + "<small class='feed-title-mobile'>%s</small>"
       + "<span class='post-actions'>"
       + addFilterLink(p)
       + bookmarkLink(p)
       + removeBookmarkLink(p)
       + "</span>"
-      + "<h3 title='%s'><a href='%s' target='_blank'>%s</h4></a>"
+      + "</div>"
+      + "<h3 title='%s'><a href='%s' target='_blank'>%s</a></h3>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
-      display.getDate(), display.getFeedTitle(),
+      display.getDate(), display.getFeedTitle(), display.getMobileFeedTitle(),
       display.getTitle(), p.getLocation(),
       display.getShortenedTitle(),
       display.getShortenedSnippet());
@@ -81,12 +86,14 @@ public class PostsHtmlView implements View<String> {
 
   private String bookmarkLink(Post p) {
     return String.format(
-      "<a href='%s' class='add-bookmark btn btn-link btn-sm' role='button'>+Bookmark</a>",
+      "<a href='%s' class='add-bookmark btn btn-link btn-sm' role='button'>"
+      + "<span class='label-full'>+Bookmark</span><span class='label-short'>+Mark</span></a>",
       bookmarkUrl(p.getId()));
   }
   private String removeBookmarkLink(Post p) {
     return String.format(
-      "<a href='%s' class='remove-bookmark btn btn-link btn-sm' role='button'>-Bookmark</a>",
+      "<a href='%s' class='remove-bookmark btn btn-link btn-sm' role='button'>"
+      + "<span class='label-full'>-Bookmark</span><span class='label-short'>-Mark</span></a>",
       removeBookmarkUrl(p.getId()));
   }
 

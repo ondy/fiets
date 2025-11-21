@@ -112,6 +112,25 @@ a { color: inherit; }
   color: #64748b;
 }
 
+.post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.post-date {
+  color: #475569;
+}
+
+.meta-separator {
+  color: #cbd5e1;
+}
+
+.feed-title-mobile {
+  display: none;
+}
+
 .post.bookmarked .add-bookmark, .post:not(.bookmarked) .remove-bookmark {
   display: none;
 }
@@ -166,7 +185,48 @@ a { color: inherit; }
   background: linear-gradient(135deg, #e2e8f0 0%, #f8fafc 100%);
 }
 
+.post-actions .label-short {
+  display: none;
+}
+
 .list-group-item .badge {
   background: rgba(51, 65, 85, 0.12);
   color: #111827;
+}
+
+@media (max-width: 575.98px) {
+  .post-meta {
+    line-height: 1.25;
+  }
+
+  .feed-title-full,
+  .meta-separator {
+    display: none;
+  }
+
+  .feed-title-mobile {
+    display: inline;
+    font-weight: 600;
+  }
+
+  .post-actions {
+    float: none;
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .post-actions .btn {
+    padding: 2px 8px;
+    line-height: 1.2;
+  }
+
+  .post-actions .label-full {
+    display: none;
+  }
+
+  .post-actions .label-short {
+    display: inline;
+  }
 }

@@ -48,6 +48,34 @@ public class PostDisplay {
     return cleanup(post.getFeed().getTitle());
   }
 
+  public String getMobileFeedTitle() {
+    String title = getFeedTitle();
+    if (title.length() <= 10) {
+      return title;
+    }
+
+    String[] words = title.split("\\s+");
+    if (words.length == 0) {
+      return title;
+    }
+
+    String firstWord = words[0];
+    if (firstWord.length() > 10) {
+      return shortenFirstWord(firstWord);
+    }
+
+    StringBuilder shortened = new StringBuilder(firstWord);
+    for (int i = 1; i < words.length; i++) {
+      String next = words[i];
+      if (shortened.length() + 1 + next.length() > 10) {
+        shortened.append("…");
+        return shortened.toString();
+      }
+      shortened.append(' ').append(next);
+    }
+    return shortened.toString();
+  }
+
   public String getLocation() {
     return cleanup(post.getLocation());
   }
@@ -57,6 +85,17 @@ public class PostDisplay {
       text = text.substring(0, maxLength-1) + " [&hellip;]";
     }
     return text;
+  }
+
+  private static String shortenFirstWord(String word) {
+    int maxChars = Math.min(word.length(), 10);
+    for (int i = 0; i < maxChars; i++) {
+      char c = word.charAt(i);
+      if (!Character.isLetterOrDigit(c)) {
+        return word.substring(0, i) + "…";
+      }
+    }
+    return word.substring(0, maxChars) + "…";
   }
 
   private static String cleanup(String text) {
