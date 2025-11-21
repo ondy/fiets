@@ -103,12 +103,12 @@ java {
 dependencies {
   implementation "org.apache.logging.log4j:log4j-core:2.23.1"
   implementation "org.apache.logging.log4j:log4j-api:2.23.1"
-  implementation "org.jodd:jodd-lagarto:6.0.7"
-  implementation "org.jodd:jodd-http:6.0.7"
-  implementation "org.jodd:jodd-json:6.0.7"
+  implementation "org.jodd:jodd-lagarto:6.0.6"
+  implementation "org.jodd:jodd-http:6.0.6"
+  implementation "org.jodd:jodd-json:6.0.6"
   implementation "com.h2database:h2:2.3.232"
   implementation "org.nanohttpd:nanohttpd:2.3.1"
   implementation "org.jsoup:jsoup:1.18.1"
-  implementation "com.syncthemall:boilerpipe:1.2.0"
+  implementation "de.l3s.boilerpipe:boilerpipe:1.2.0"
   testImplementation "junit:junit:4.13.2"
 }
