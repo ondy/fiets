@@ -20,7 +20,7 @@ public class FileView implements View<InputStream> {
     if (localFile.exists()) {
       stream = new FileInputStream(localFile);
     } else {
-      stream = Server.class.getResourceAsStream("/META-INF/resources/" + path);
+      stream = Server.class.getResourceAsStream("/" + path);
     }
     if (stream == null) {
       throw new FileNotFoundException(path);
