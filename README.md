@@ -44,7 +44,10 @@ existing schemas. When it detects an older H2 1.4.x database, it will now
 **automatically export, back up, and import the data into the new 2.x file
 format** on startup. The original `db/fiets.mv.db` is saved as
 `db/fiets.mv.db.legacy` and the trace file (if present) as
-`db/fiets.trace.db.legacy` so no data is lost.
+`db/fiets.trace.db.legacy` so no data is lost. On platforms that prevent the
+file from being moved (e.g., Windows holding a file lock or read-only volumes),
+the migrator will keep the legacy file in place and import into a new
+`db/fiets-v2.mv.db` instead.
 
 If the automatic migration cannot download the legacy H2 jar (e.g., due to
 restricted network access), you can still run the helper script manually:

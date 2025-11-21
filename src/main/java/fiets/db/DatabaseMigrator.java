@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.h2.tools.RunScript;
 
+import java.nio.file.AccessDeniedException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,7 +36,7 @@ public class DatabaseMigrator {
     this.dbBase = dbBase;
   }
 
-  public void migrateLegacyToCurrent() throws SQLException {
+  public String migrateLegacyToCurrent() throws SQLException {
     Path dbFile = Paths.get(dbBase + ".mv.db");
     if (!Files.exists(dbFile)) {
       throw new SQLException("Legacy H2 database not found at " + dbFile);
@@ -43,6 +44,8 @@ public class DatabaseMigrator {
 
     Path dbBackup = Paths.get(dbBase + ".mv.db.legacy");
     Path traceBackup = Paths.get(dbBase + ".trace.db.legacy");
+    boolean backupCreated = false;
+    String targetDbBase = dbBase;
 
     Path toolsDir = Paths.get("build", "h2");
     Path legacyJar = toolsDir.resolve(LEGACY_JAR_NAME);
@@ -51,16 +54,27 @@ public class DatabaseMigrator {
       Files.createDirectories(toolsDir);
       downloadIfMissing(legacyJar);
       exportWithLegacyEngine(legacyJar, exportScript);
-      backupLegacyFiles(dbBackup, traceBackup);
-      importWithCurrentEngine(exportScript);
-      log.info("Automatic H2 migration completed. New database at {}.mv.db", dbBase);
+      try {
+        backupLegacyFiles(dbBackup, traceBackup);
+        backupCreated = true;
+      } catch (AccessDeniedException ade) {
+        targetDbBase = dbBase + "-v2";
+        log.warn("Could not move legacy database for backup ({}). "
+            + "Leaving the original file untouched and importing into {} instead.",
+          ade.getMessage(), targetDbBase);
+      }
+      importWithCurrentEngine(exportScript, targetDbBase);
+      log.info("Automatic H2 migration completed. New database at {}.mv.db", targetDbBase);
+      return targetDbBase;
     } catch (IOException | InterruptedException e) {
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
       throw new SQLException("Failed to migrate H2 database automatically", e);
     } catch (SQLException e) {
-      restoreBackup(dbFile, dbBackup, traceBackup);
+      if (backupCreated) {
+        restoreBackup(dbFile, dbBackup, traceBackup);
+      }
       throw e;
     }
   }
@@ -126,8 +140,9 @@ public class DatabaseMigrator {
     }
   }
 
-  private void importWithCurrentEngine(Path exportScript) throws SQLException, IOException {
-    String url = "jdbc:h2:" + dbBase + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
+  private void importWithCurrentEngine(Path exportScript, String targetDbBase)
+    throws SQLException, IOException {
+    String url = "jdbc:h2:" + targetDbBase + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
     try (Connection conn = DriverManager.getConnection(url, "sa", "")) {
       try (InputStreamReader reader = new InputStreamReader(
         Files.newInputStream(exportScript), StandardCharsets.UTF_8)) {

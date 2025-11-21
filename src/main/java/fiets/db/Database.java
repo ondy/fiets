@@ -20,10 +20,10 @@ import java.util.Date;
 public class Database implements AutoCloseable {
 
   private static final String DB_BASE = "./db/fiets";
-  private static final String DB_URL =
-    "jdbc:h2:" + DB_BASE + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
   private static final Logger log = LogManager.getLogger();
 
+  private final String dbBase;
+  private final String dbUrl;
   private final Connection conn;
 
   /**
@@ -31,16 +31,24 @@ public class Database implements AutoCloseable {
    */
   public Database() throws SQLException {
     new File("db").mkdir();
+    this.dbBase = DB_BASE;
+    this.dbUrl = buildUrl(dbBase);
+
     Connection connection;
     try {
-      connection = DriverManager.getConnection(DB_URL, "sa", "");
+      connection = DriverManager.getConnection(dbUrl, "sa", "");
     } catch (SQLException ex) {
       if (isLegacyFormat(ex)) {
         log.warn("Detected legacy H2 database; attempting automatic migration...");
         DatabaseMigrator migrator = new DatabaseMigrator(DB_BASE);
-        migrator.migrateLegacyToCurrent();
-        log.info("Migration complete. Reconnecting using upgraded database.");
-        connection = DriverManager.getConnection(DB_URL, "sa", "");
+        String migratedBase = migrator.migrateLegacyToCurrent();
+        String targetUrl = migratedBase.equals(dbBase) ? dbUrl : buildUrl(migratedBase);
+        if (!migratedBase.equals(dbBase)) {
+          log.info("Using migrated database at {} after permission-safe import.", migratedBase);
+        } else {
+          log.info("Migration complete. Reconnecting using upgraded database.");
+        }
+        connection = DriverManager.getConnection(targetUrl, "sa", "");
       } else {
         throw ex;
       }
@@ -103,6 +111,10 @@ public class Database implements AutoCloseable {
     return message != null
       && (message.contains("Unsupported database file version")
         || message.contains("read format 1 is smaller"));
+  }
+
+  private static String buildUrl(String base) {
+    return "jdbc:h2:" + base + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
   }
 
 }
