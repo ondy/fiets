@@ -163,10 +163,6 @@ a { color: inherit; }
   margin-bottom: 5px;
 }
 
-#edit-filter-modal {
-  display: none;
-}
-
 .deployment-info {
   font-size: 0.8rem;
   color: #64748b;
