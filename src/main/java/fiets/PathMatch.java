@@ -217,11 +217,15 @@ public enum PathMatch {
 
   public static PathMatch match(SessionDecorator sd) {
     String path = sd.getMainPath();
+    if (path == null || path.isEmpty()) {
+      return showUnreadPosts;
+    }
     for (PathMatch pm : values()) {
       if (path.equals(pm.base)) {
         return pm;
       }
     }
-    throw new IllegalArgumentException("Path not found: " + sd.getMainPath());
+    log.warn("Unknown path '{}', serving unread posts.", sd.getMainPath());
+    return showUnreadPosts;
   }
 }
