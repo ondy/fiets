@@ -84,10 +84,10 @@ jar {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
   from('build/assets') {
-    into 'META-INF/resources/static'
+    into 'static'
   }
   from('src/main/resources/static') {
-    into 'META-INF/resources/static'
+    into 'static'
   }
 }
 

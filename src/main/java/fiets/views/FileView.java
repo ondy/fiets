@@ -20,11 +20,19 @@ public class FileView implements View<InputStream> {
     if (localFile.exists()) {
       stream = new FileInputStream(localFile);
     } else {
-      stream = Server.class.getResourceAsStream("/" + path);
+      stream = loadFromClasspath(path);
     }
     if (stream == null) {
       throw new FileNotFoundException(path);
     }
+  }
+
+  private InputStream loadFromClasspath(String path) {
+    InputStream classpathStream = Server.class.getResourceAsStream("/" + path);
+    if (classpathStream != null) {
+      return classpathStream;
+    }
+    return Server.class.getResourceAsStream("/META-INF/resources/" + path);
   }
 
   private String determineMimeType(String path) {
