@@ -7,7 +7,6 @@ import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
-import jodd.http.HttpStatus;
 import jodd.jerry.Jerry;
 
 public class ContentUnfolder {
@@ -59,7 +58,7 @@ public class ContentUnfolder {
         .connectionTimeout(10000)
         .trustAllCerts(true)
         .send();
-      if (rsp.statusCode() == HttpStatus.HTTP_MOVED_PERMANENTLY) {
+      if (rsp.statusCode() == 301) {
         String redirect = rsp.header("location");
         return loadUrlContent(redirect, depth+1);
       }

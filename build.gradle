@@ -72,6 +72,7 @@ assemble.dependsOn downloadAssets
 jar {
   archiveBaseName.set('fiets')
   archiveVersion.set('0.11.0')
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   manifest {
     attributes(
       "Main-Class": "fiets.Server",
@@ -81,6 +82,12 @@ jar {
 
   from {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+  from('build/assets') {
+    into 'static'
+  }
+  from('src/main/resources/static') {
+    into 'static'
   }
   from('build/assets') {
     into 'META-INF/resources/static'
@@ -94,18 +101,21 @@ repositories {
   mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 
 dependencies {
-  implementation "org.apache.logging.log4j:log4j-core:[2,3["
-  implementation "org.apache.logging.log4j:log4j-api:[2,3["
-  implementation "org.jodd:jodd-lagarto:[4,5["
-  implementation "org.jodd:jodd-http:[4,5["
-  implementation "org.jodd:jodd-json:[4,5["
-  implementation "com.h2database:h2:[1.4,1.5["
-  implementation "org.nanohttpd:nanohttpd:[2,3["
-  implementation "org.jsoup:jsoup:[1,2["
-  implementation "com.syncthemall:boilerpipe:[1.2,1.3["
+  implementation "org.apache.logging.log4j:log4j-core:2.23.1"
+  implementation "org.apache.logging.log4j:log4j-api:2.23.1"
+  implementation "org.jodd:jodd-lagarto:5.1.5"
+  implementation "org.jodd:jodd-http:5.1.5"
+  implementation "org.jodd:jodd-json:5.1.5"
+  implementation "com.h2database:h2:2.3.232"
+  implementation "org.nanohttpd:nanohttpd:2.3.1"
+  implementation "org.jsoup:jsoup:1.18.1"
+  implementation "de.l3s.boilerpipe:boilerpipe:1.1.0"
   testImplementation "junit:junit:4.13.2"
 }

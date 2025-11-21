@@ -1,4 +1,5 @@
-FROM gradle:5.3 AS build
+# Build stage
+FROM gradle:8.10-jdk21 AS build
 WORKDIR /src
 
 USER root
@@ -9,13 +10,14 @@ COPY --chown=gradle:gradle . /src/fiets
 WORKDIR /src/fiets
 RUN gradle build
 
-FROM adoptopenjdk/openjdk8:alpine-jre
+# Runtime stage
+FROM eclipse-temurin:21-jre
 
 ENV FIETS_HOME /usr/local/fiets
 ENV PATH $FIETS_HOME/bin:$PATH
-RUN mkdir -p "$FIETS_HOME"; \
-  adduser -D -g '' fiets-user; \
-  chown fiets-user $FIETS_HOME
+RUN mkdir -p "$FIETS_HOME" \
+  && useradd --create-home --shell /bin/false fiets-user \
+  && chown fiets-user $FIETS_HOME
 
 USER fiets-user
 WORKDIR $FIETS_HOME

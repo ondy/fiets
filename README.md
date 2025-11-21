@@ -18,26 +18,43 @@ Quickstart.
     * Implement views to highlight certain posts.
 
 ## Quickstart
-(As _fiets_ is Java based, you need a working JRE on your path. Any 8+ 
-version should do it.)
+(As _fiets_ is Java based, you need a working JRE on your path. The project
+now targets the current Java LTS release (21).)
 
 If you have an OPML file to import, you should do that first (if not, just
 skip this step):
 
-    java -cp fiets-0.10.jar fiets.opml.ImportOpml <filename.opml>
+    java -cp fiets-0.11.jar fiets.opml.ImportOpml <filename.opml>
 
 Next, start _fiets_:
 
-    java -jar fiets-0.10.jar
+    java -jar fiets-0.11.jar
 
 By default it starts to listen at port 7000. You can choose an alternative port
-as optional command line parameter.
+as optional command line parameter or via the `PORT` environment variable (e.g.
+platforms that inject a port dynamically).
 
 Fiets _provides no means to secure the connection. When deploying it on a_
 _public site make sure to run it behind a reverse proxy with authentication_
 _and HTTPS!_
 
-Database files are created in the current directory, log files below `logs`. 
+Database files are created in the current directory, log files below `logs`.
+_Fiets_ now runs on H2 2.x while keeping compatibility mode enabled to preserve
+existing schemas. When it detects an older H2 1.4.x database, it will now
+**automatically export, back up, and import the data into the new 2.x file
+format** on startup. The original `db/fiets.mv.db` is saved as
+`db/fiets.mv.db.legacy` and the trace file (if present) as
+`db/fiets.trace.db.legacy` so no data is lost.
+
+If the automatic migration cannot download the legacy H2 jar (e.g., due to
+restricted network access), you can still run the helper script manually:
+
+```
+./scripts/migrate-h2.sh [path/to/db/fiets]
+```
+
+The script performs the same export/import steps and keeps the legacy backup
+files intact.
 
 _Fiets_ immediately starts checking known feeds for updates. 
 
@@ -60,7 +77,7 @@ If you prefer to build from the current source:
 git clone https://github.com/ondy/fiets.git
 cd fiets
 gradle build
-java -jar build/libs/fiets-0.10.jar 
+java -jar build/libs/fiets-0.11.jar
 ```
 There are also some really barebone bash start and stop scripts for your convenience.
 
