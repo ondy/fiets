@@ -4,19 +4,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.h2.tools.RunScript;
 
-import java.nio.file.AccessDeniedException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -54,6 +58,7 @@ public class DatabaseMigrator {
       Files.createDirectories(toolsDir);
       downloadIfMissing(legacyJar);
       exportWithLegacyEngine(legacyJar, exportScript);
+      Path sanitizedExport = sanitizeExport(exportScript);
       try {
         backupLegacyFiles(dbBackup, traceBackup);
         backupCreated = true;
@@ -64,10 +69,10 @@ public class DatabaseMigrator {
           ade.getMessage(), targetDbBase);
       }
       try {
-        importWithCurrentEngine(exportScript, targetDbBase);
+        importWithCurrentEngine(sanitizedExport, targetDbBase);
       } catch (SQLException | IOException e) {
         if (isAccessDenied(e)) {
-          targetDbBase = migrateToTempLocation(exportScript, targetDbBase);
+          targetDbBase = migrateToTempLocation(sanitizedExport, targetDbBase);
         } else {
           throw e;
         }
@@ -112,6 +117,25 @@ public class DatabaseMigrator {
     }
     String message = e.getMessage();
     return message != null && message.toLowerCase().contains("access denied");
+  }
+
+  private Path sanitizeExport(Path exportScript) throws IOException {
+    Path sanitized = exportScript.getParent().resolve("export-sanitized.sql");
+    try (BufferedReader reader = Files.newBufferedReader(exportScript, StandardCharsets.UTF_8);
+         BufferedWriter writer = Files.newBufferedWriter(sanitized, StandardCharsets.UTF_8)) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        String trimmed = line.trim().toUpperCase();
+        if (trimmed.startsWith("CREATE SEQUENCE")
+          || trimmed.startsWith("DROP SEQUENCE")
+          || trimmed.startsWith("ALTER SEQUENCE")) {
+          continue;
+        }
+        writer.write(line);
+        writer.newLine();
+      }
+    }
+    return sanitized;
   }
 
   private void downloadIfMissing(Path legacyJar) throws IOException {
@@ -183,6 +207,29 @@ public class DatabaseMigrator {
         Files.newInputStream(exportScript), StandardCharsets.UTF_8)) {
         RunScript.execute(conn, reader);
       }
+      resetIdentitySequences(conn);
+    }
+  }
+
+  private void resetIdentitySequences(Connection conn) throws SQLException {
+    resetIdentitySequence(conn, "feed");
+    resetIdentitySequence(conn, "filter");
+    resetIdentitySequence(conn, "post");
+  }
+
+  private void resetIdentitySequence(Connection conn, String table) throws SQLException {
+    long maxId;
+    try (PreparedStatement ps = conn.prepareStatement(
+      "SELECT COALESCE(MAX(id), 0) FROM " + table)) {
+      try (ResultSet rs = ps.executeQuery()) {
+        rs.next();
+        maxId = rs.getLong(1);
+      }
+    }
+    long nextId = maxId + 1;
+    try (PreparedStatement ps = conn.prepareStatement(
+      "ALTER TABLE " + table + " ALTER COLUMN id RESTART WITH " + nextId)) {
+      ps.execute();
     }
   }
 
