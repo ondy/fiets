@@ -109,6 +109,6 @@ dependencies {
   implementation "com.h2database:h2:2.3.232"
   implementation "org.nanohttpd:nanohttpd:2.3.1"
   implementation "org.jsoup:jsoup:1.18.1"
-  implementation "de.l3s.boilerpipe:boilerpipe:1.2.0"
+  implementation "de.l3s.boilerpipe:boilerpipe:1.1.0"
   testImplementation "junit:junit:4.13.2"
 }
