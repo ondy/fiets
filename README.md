@@ -47,7 +47,10 @@ format** on startup. The original `db/fiets.mv.db` is saved as
 `db/fiets.trace.db.legacy` so no data is lost. On platforms that prevent the
 file from being moved (e.g., Windows holding a file lock or read-only volumes),
 the migrator will keep the legacy file in place and import into a new
-`db/fiets-v2.mv.db` instead.
+`db/fiets-v2.mv.db` instead. If the platform prevents creating that fallback
+file, the migration is re-attempted in a writable temp directory (e.g.,
+`/tmp/fiets-db/fiets-v2.mv.db`) and a log message notes the alternative
+location.
 
 If the automatic migration cannot download the legacy H2 jar (e.g., due to
 restricted network access), you can still run the helper script manually:

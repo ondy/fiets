@@ -63,7 +63,16 @@ public class DatabaseMigrator {
             + "Leaving the original file untouched and importing into {} instead.",
           ade.getMessage(), targetDbBase);
       }
-      importWithCurrentEngine(exportScript, targetDbBase);
+      try {
+        importWithCurrentEngine(exportScript, targetDbBase);
+      } catch (SQLException | IOException e) {
+        if (isAccessDenied(e)) {
+          targetDbBase = migrateToTempLocation(exportScript, targetDbBase);
+        } else {
+          throw e;
+        }
+      }
+
       log.info("Automatic H2 migration completed. New database at {}.mv.db", targetDbBase);
       return targetDbBase;
     } catch (IOException | InterruptedException e) {
@@ -77,6 +86,32 @@ public class DatabaseMigrator {
       }
       throw e;
     }
+  }
+
+  private String migrateToTempLocation(Path exportScript, String failedTarget)
+    throws SQLException, IOException {
+    Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"), "fiets-db");
+    Files.createDirectories(tmpDir);
+    String tempBase = tmpDir.resolve("fiets-v2").toString();
+    log.warn(
+      "Cannot write migrated H2 database to {} due to permissions. "
+        + "Re-trying import in writable temp directory at {}.",
+      failedTarget, tempBase);
+    importWithCurrentEngine(exportScript, tempBase);
+    log.info("Migration succeeded using temp directory fallback at {}.mv.db", tempBase);
+    return tempBase;
+  }
+
+  private boolean isAccessDenied(Exception e) {
+    Throwable cause = e;
+    while (cause != null) {
+      if (cause instanceof AccessDeniedException) {
+        return true;
+      }
+      cause = cause.getCause();
+    }
+    String message = e.getMessage();
+    return message != null && message.toLowerCase().contains("access denied");
   }
 
   private void downloadIfMissing(Path legacyJar) throws IOException {
