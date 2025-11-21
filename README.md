@@ -38,7 +38,10 @@ Fiets _provides no means to secure the connection. When deploying it on a_
 _public site make sure to run it behind a reverse proxy with authentication_
 _and HTTPS!_
 
-Database files are created in the current directory, log files below `logs`. 
+Database files are created in the current directory, log files below `logs`.
+To remain compatible with existing installations, _fiets_ ships with H2 1.4.200;
+if you previously ran a build that wrote the database with H2 2.x, delete the
+`db` directory or restore a backup created before the upgrade.
 
 _Fiets_ immediately starts checking known feeds for updates. 
 
