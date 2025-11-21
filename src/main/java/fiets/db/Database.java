@@ -1,6 +1,9 @@
 package fiets.db;
 
 import java.io.File;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -16,6 +19,11 @@ import java.util.Date;
  */
 public class Database implements AutoCloseable {
 
+  private static final String DB_BASE = "./db/fiets";
+  private static final String DB_URL =
+    "jdbc:h2:" + DB_BASE + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
+  private static final Logger log = LogManager.getLogger();
+
   private final Connection conn;
 
   /**
@@ -24,18 +32,17 @@ public class Database implements AutoCloseable {
   public Database() throws SQLException {
     new File("db").mkdir();
     try {
-      conn = DriverManager.getConnection(
-        "jdbc:h2:./db/fiets;MODE=LEGACY;DATABASE_TO_LOWER=TRUE",
-        "sa", "");
+      conn = DriverManager.getConnection(DB_URL, "sa", "");
     } catch (SQLException ex) {
-      if (ex.getMessage() != null
-        && ex.getMessage().contains("Unsupported database file version")) {
-        throw new SQLException(
-          "Existing H2 database was created with 1.4.x. "
-            + "Run scripts/migrate-h2.sh to export and re-import it for H2 2.x.",
-          ex);
+      if (isLegacyFormat(ex)) {
+        log.warn("Detected legacy H2 database; attempting automatic migration...");
+        DatabaseMigrator migrator = new DatabaseMigrator(DB_BASE);
+        migrator.migrateLegacyToCurrent();
+        log.info("Migration complete. Reconnecting using upgraded database.");
+        conn = DriverManager.getConnection(DB_URL, "sa", "");
+      } else {
+        throw ex;
       }
-      throw ex;
     }
   }
 
@@ -87,6 +94,13 @@ public class Database implements AutoCloseable {
         table, column, table, column))) {
       ps.executeUpdate();
     }
+  }
+
+  private static boolean isLegacyFormat(SQLException ex) {
+    String message = ex.getMessage();
+    return message != null
+      && (message.contains("Unsupported database file version")
+        || message.contains("read format 1 is smaller"));
   }
 
 }

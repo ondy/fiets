@@ -40,19 +40,21 @@ _and HTTPS!_
 
 Database files are created in the current directory, log files below `logs`.
 _Fiets_ now runs on H2 2.x while keeping compatibility mode enabled to preserve
-existing schemas.
+existing schemas. When it detects an older H2 1.4.x database, it will now
+**automatically export, back up, and import the data into the new 2.x file
+format** on startup. The original `db/fiets.mv.db` is saved as
+`db/fiets.mv.db.legacy` and the trace file (if present) as
+`db/fiets.trace.db.legacy` so no data is lost.
 
-If you are upgrading from an older release that still used H2 1.4.x, export the
-legacy database and re-import it with the included migration helper **before**
-starting the new jar:
+If the automatic migration cannot download the legacy H2 jar (e.g., due to
+restricted network access), you can still run the helper script manually:
 
 ```
 ./scripts/migrate-h2.sh [path/to/db/fiets]
 ```
 
-The script downloads both H2 versions, writes an SQL export, keeps the legacy
-`db/fiets.mv.db` as a `.legacy` backup, and recreates the database in the 2.x
-file format without losing data.
+The script performs the same export/import steps and keeps the legacy backup
+files intact.
 
 _Fiets_ immediately starts checking known feeds for updates. 
 
