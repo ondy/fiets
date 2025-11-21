@@ -27,12 +27,20 @@ public class Server extends NanoHTTPD {
   }
 
   public static void main(String[] args) throws Exception {
-    int port = 7000;
-    if (args.length > 0) {
-      port = Integer.parseInt(args[0]);
-    }
+    int port = determinePort(args);
     Server srv = new Server(port);
     srv.init();
+  }
+
+  private static int determinePort(String[] args) {
+    if (args.length > 0) {
+      return Integer.parseInt(args[0]);
+    }
+    String envPort = System.getenv("PORT");
+    if (envPort != null && !envPort.isBlank()) {
+      return Integer.parseInt(envPort.trim());
+    }
+    return 7000;
   }
 
   private void scheduleNowAndEvery(Runnable r, long everyMillis) {

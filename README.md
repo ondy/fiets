@@ -31,7 +31,8 @@ Next, start _fiets_:
     java -jar fiets-0.11.jar
 
 By default it starts to listen at port 7000. You can choose an alternative port
-as optional command line parameter.
+as optional command line parameter or via the `PORT` environment variable (e.g.
+platforms that inject a port dynamically).
 
 Fiets _provides no means to secure the connection. When deploying it on a_
 _public site make sure to run it behind a reverse proxy with authentication_
