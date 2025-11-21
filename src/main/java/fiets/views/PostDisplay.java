@@ -68,7 +68,6 @@ public class PostDisplay {
     for (int i = 1; i < words.length; i++) {
       String next = words[i];
       if (shortened.length() + 1 + next.length() > 10) {
-        shortened.append("…");
         return shortened.toString();
       }
       shortened.append(' ').append(next);
@@ -92,10 +91,10 @@ public class PostDisplay {
     for (int i = 0; i < maxChars; i++) {
       char c = word.charAt(i);
       if (!Character.isLetterOrDigit(c)) {
-        return word.substring(0, i) + "…";
+        return word.substring(0, i);
       }
     }
-    return word.substring(0, maxChars) + "…";
+    return word.substring(0, maxChars);
   }
 
   private static String cleanup(String text) {
