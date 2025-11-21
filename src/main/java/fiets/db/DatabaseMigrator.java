@@ -107,6 +107,11 @@ public class DatabaseMigrator {
     return tempBase;
   }
 
+  private String buildCurrentUrl(String targetDbBase) {
+    return "jdbc:h2:" + targetDbBase
+      + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0";
+  }
+
   private boolean isAccessDenied(Exception e) {
     Throwable cause = e;
     while (cause != null) {
@@ -201,13 +206,24 @@ public class DatabaseMigrator {
 
   private void importWithCurrentEngine(Path exportScript, String targetDbBase)
     throws SQLException, IOException {
-    String url = "jdbc:h2:" + targetDbBase + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
+    String url = buildCurrentUrl(targetDbBase);
     try (Connection conn = DriverManager.getConnection(url, "sa", "")) {
+      ensurePublicSchema(conn);
       try (InputStreamReader reader = new InputStreamReader(
         Files.newInputStream(exportScript), StandardCharsets.UTF_8)) {
         RunScript.execute(conn, reader);
       }
       resetIdentitySequences(conn);
+    }
+  }
+
+  private void ensurePublicSchema(Connection conn) throws SQLException {
+    try (PreparedStatement create = conn.prepareStatement(
+      "CREATE SCHEMA IF NOT EXISTS PUBLIC")) {
+      create.execute();
+    }
+    try (PreparedStatement set = conn.prepareStatement("SET SCHEMA PUBLIC")) {
+      set.execute();
     }
   }
 

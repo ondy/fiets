@@ -114,7 +114,8 @@ public class Database implements AutoCloseable {
   }
 
   private static String buildUrl(String base) {
-    return "jdbc:h2:" + base + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE";
+    return "jdbc:h2:" + base
+      + ";MODE=LEGACY;DATABASE_TO_LOWER=TRUE;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=0";
   }
 
 }
