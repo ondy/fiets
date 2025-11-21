@@ -31,19 +31,21 @@ public class Database implements AutoCloseable {
    */
   public Database() throws SQLException {
     new File("db").mkdir();
+    Connection connection;
     try {
-      conn = DriverManager.getConnection(DB_URL, "sa", "");
+      connection = DriverManager.getConnection(DB_URL, "sa", "");
     } catch (SQLException ex) {
       if (isLegacyFormat(ex)) {
         log.warn("Detected legacy H2 database; attempting automatic migration...");
         DatabaseMigrator migrator = new DatabaseMigrator(DB_BASE);
         migrator.migrateLegacyToCurrent();
         log.info("Migration complete. Reconnecting using upgraded database.");
-        conn = DriverManager.getConnection(DB_URL, "sa", "");
+        connection = DriverManager.getConnection(DB_URL, "sa", "");
       } else {
         throw ex;
       }
     }
+    this.conn = connection;
   }
 
   /**
