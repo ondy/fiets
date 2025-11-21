@@ -107,9 +107,9 @@ targetCompatibility = JavaVersion.VERSION_21
 dependencies {
   implementation "org.apache.logging.log4j:log4j-core:2.24.3"
   implementation "org.apache.logging.log4j:log4j-api:2.24.3"
-  implementation "org.jodd:jodd-lagarto:6.0.6"
-  implementation "org.jodd:jodd-http:6.0.6"
-  implementation "org.jodd:jodd-json:6.0.6"
+  implementation "org.jodd:jodd-lagarto:6.0.2"
+  implementation "org.jodd:jodd-http:6.0.2"
+  implementation "org.jodd:jodd-json:6.0.2"
   implementation "com.h2database:h2:1.4.200"
   implementation "org.nanohttpd:nanohttpd:2.3.1"
   implementation "org.jsoup:jsoup:1.18.1"
