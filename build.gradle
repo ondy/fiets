@@ -5,6 +5,12 @@ group = 'ondy'
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}
 sourceSets {
   main {
     resources {
@@ -72,6 +78,7 @@ assemble.dependsOn downloadAssets
 jar {
   archiveBaseName.set('fiets')
   archiveVersion.set('0.11.0')
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   manifest {
     attributes(
       "Main-Class": "fiets.Server",
@@ -94,8 +101,8 @@ repositories {
   mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 dependencies {
   implementation "org.apache.logging.log4j:log4j-core:[2,3["

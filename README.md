@@ -18,8 +18,9 @@ Quickstart.
     * Implement views to highlight certain posts.
 
 ## Quickstart
-(As _fiets_ is Java based, you need a working JRE on your path. Any 8+ 
-version should do it.)
+(As _fiets_ is Java based, you need a working Java 21 (LTS) runtime on your
+path. The codebase builds cleanly against Java 21 without source changes; the
+Gradle toolchain enforces the required compiler level.)
 
 If you have an OPML file to import, you should do that first (if not, just
 skip this step):
