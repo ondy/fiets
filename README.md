@@ -18,17 +18,17 @@ Quickstart.
     * Implement views to highlight certain posts.
 
 ## Quickstart
-(As _fiets_ is Java based, you need a working JRE on your path. Any 8+ 
-version should do it.)
+(As _fiets_ is Java based, you need a working JRE on your path. The project
+now targets the current Java LTS release (21).)
 
 If you have an OPML file to import, you should do that first (if not, just
 skip this step):
 
-    java -cp fiets-0.10.jar fiets.opml.ImportOpml <filename.opml>
+    java -cp fiets-0.11.jar fiets.opml.ImportOpml <filename.opml>
 
 Next, start _fiets_:
 
-    java -jar fiets-0.10.jar
+    java -jar fiets-0.11.jar
 
 By default it starts to listen at port 7000. You can choose an alternative port
 as optional command line parameter.
@@ -60,7 +60,7 @@ If you prefer to build from the current source:
 git clone https://github.com/ondy/fiets.git
 cd fiets
 gradle build
-java -jar build/libs/fiets-0.10.jar 
+java -jar build/libs/fiets-0.11.jar
 ```
 There are also some really barebone bash start and stop scripts for your convenience.
 
