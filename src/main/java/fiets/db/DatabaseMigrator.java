@@ -136,7 +136,13 @@ public class DatabaseMigrator {
           || trimmed.startsWith("ALTER SEQUENCE")) {
           continue;
         }
-        writer.write(line);
+
+        // Remove schema prefixes so imports succeed even if PUBLIC was not created
+        // automatically when the new database file is initialized.
+        String normalized = line.replace("\"PUBLIC\".", "")
+          .replace("PUBLIC.", "");
+
+        writer.write(normalized);
         writer.newLine();
       }
     }
