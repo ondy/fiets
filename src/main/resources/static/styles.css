@@ -62,6 +62,14 @@ a { color: inherit; }
   color: #475569;
 }
 
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  line-height: 1.4;
+}
+
 .post, .feed {
   position: relative;
 }
@@ -163,10 +171,9 @@ a { color: inherit; }
 }
 
 .deployment-info {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #64748b;
   text-align: right;
-  margin-top: 6px;
 }
 
 .post-actions .btn,
