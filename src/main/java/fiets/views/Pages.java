@@ -40,7 +40,6 @@ public final class Pages {
     String title, int unread, int bookmarks) {
     return HEADER_TEMPLATE
       .replace("%TITLE%", title)
-      .replace("%DEPLOYMENT_INFO%", DeploymentInfo.getDisplayText())
       .replace("%UNREAD_COUNT%",
         unread == -1 ? "" : String.format(
           " (<span class='unread-count'>%d</span>)", unread))
@@ -52,8 +51,9 @@ public final class Pages {
   }
 
   public static String footerTemplate(String footerLinks) {
-    return FOOTER_TEMPLATE.replace("%FOOTERLINKS%",
-      footerLinks);
+    return FOOTER_TEMPLATE
+      .replace("%FOOTERLINKS%", footerLinks)
+      .replace("%DEPLOYMENT_INFO%", DeploymentInfo.getDisplayText());
   }
 
   public static String editFilterTemplate() {
