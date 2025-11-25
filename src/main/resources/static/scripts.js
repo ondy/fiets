@@ -9,6 +9,99 @@ function getEditFilterModal() {
   return bootstrap.Modal.getOrCreateInstance(modalElement);
 }
 
+function updateUnreadCount(unread) {
+  var $unread = $('.unread-count');
+  if ($unread.length === 0) {
+    return;
+  }
+  $unread.text(unread);
+  var $doc = $(document);
+  var title = $doc.attr("title");
+  if (title.indexOf(' of ') > 0) {
+    title = title.replace(/of \d+ posts/, 'of ' + unread + ' posts');
+  } else {
+    title = title.replace(/\d+ posts/, unread + ' posts');
+  }
+  $doc.attr("title", title);
+}
+
+function initPostPager() {
+  var $postList = $('.posts-list');
+  var $markRead = $('.mark-read-action');
+  if ($postList.length === 0 || $markRead.length === 0) {
+    return;
+  }
+
+  var pageSize = parseInt($postList.data('page-size'), 10) || 20;
+  var totalUnread = parseInt($markRead.data('total-unread'), 10);
+  if (isNaN(totalUnread)) {
+    totalUnread = $postList.find('.post').length;
+  }
+
+  var postsCache = $postList.find('.post').detach().toArray();
+
+  function visiblePosts() {
+    return postsCache.slice(0, pageSize);
+  }
+
+  function updateMarkReadLink() {
+    var postsToMark = visiblePosts();
+    if (postsToMark.length === 0) {
+      $postList.append('<li class="list-group-item"><small>No more posts.</small></li>');
+      $markRead.addClass('disabled').attr('aria-disabled', 'true');
+      $markRead.find('small').text('No more posts to mark');
+      return;
+    }
+
+    var ids = postsToMark.map(function (post) {
+      return $(post).data('post-id');
+    });
+
+    $markRead
+      .removeClass('disabled')
+      .removeAttr('aria-disabled')
+      .attr('href', '/markread?posts=' + ids.join(','))
+      .find('small')
+      .text('Mark ' + postsToMark.length + ' of ' + totalUnread + ' read');
+  }
+
+  function renderVisiblePosts() {
+    $postList.empty();
+    visiblePosts().forEach(function (post) {
+      $postList.append(post);
+    });
+    updateMarkReadLink();
+  }
+
+  renderVisiblePosts();
+
+  $markRead.on('click', function (evt) {
+    var postsToMark = visiblePosts();
+    if (postsToMark.length === 0) {
+      return;
+    }
+    evt.preventDefault();
+
+    var ids = postsToMark.map(function (post) {
+      return $(post).data('post-id');
+    });
+
+    $.ajax({
+      url: '/markread?posts=' + ids.join(','),
+      cache: false
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus + " - " + errorThrown);
+      alert(textStatus);
+    });
+
+    postsCache = postsCache.slice(postsToMark.length);
+    totalUnread = Math.max(totalUnread - postsToMark.length, 0);
+    updateUnreadCount(totalUnread);
+    renderVisiblePosts();
+  });
+}
+
 setInterval(function () {
   $.ajax({
     dataType: "json",
@@ -16,19 +109,7 @@ setInterval(function () {
     cache: false
   })
   .done(function (data, textStatus, jqXHR) {
-    var unread = data.unread_count;
-    var $unread = $('.unread-count');
-    if ($unread.length > 0) {
-      $('.unread-count').text(unread);
-      var $doc = $(document);
-      var title = $doc.attr("title");
-      if (title.indexOf(' of ') > 0) {
-        title = title.replace(/of \d+ posts/, 'of ' + unread + ' posts');
-      } else {
-        title = title.replace(/\d+ posts/, unread + ' posts');
-      }
-      $doc.attr("title", title);
-    }
+    updateUnreadCount(data.unread_count);
   })
   .fail(function(jqXHR, textStatus, errorThrown) {
     console.log(textStatus + " - " + errorThrown);
@@ -126,11 +207,11 @@ $('#edit-filter').click(function () {
       if (modal) {
         modal.hide();
       }
-  })
-  .fail(function(jqXHR, textStatus, errorThrown) {
-    console.log(textStatus + " - " + errorThrown);
-    alert(textStatus);
-  });
+   })
+   .fail(function(jqXHR, textStatus, errorThrown) {
+     console.log(textStatus + " - " + errorThrown);
+     alert(textStatus);
+   });
 });
 $('.bookmarklet').each(function () {
   var $a = $(this);
@@ -140,4 +221,8 @@ $('.bookmarklet').each(function () {
   pos = url.indexOf('/', pos);
   href = href.replace("*HOST*", url.substring(0, pos));
   $a.attr("href", href);
+});
+
+$(function () {
+  initPostPager();
 });

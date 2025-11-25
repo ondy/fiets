@@ -18,9 +18,9 @@ import org.apache.logging.log4j.Logger;
 public enum PathMatch {
   showUnreadPosts("") {
     @Override public View<String> serve(
-      SessionDecorator sd, FeedService fs) 
+      SessionDecorator sd, FeedService fs)
       throws SQLException {
-      List<Post> posts = fs.getUnreadPosts(sd.intParamOr("num", 20));
+      List<Post> posts = fs.getUnreadPosts(sd.intParamOr("num", 0));
       Set<Long> bookmarks = fs.getBookmarks();
       int allCount = fs.getUnreadCount();
       return new PostsHtmlView(
