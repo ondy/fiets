@@ -99,6 +99,7 @@ function initPostPager() {
     totalUnread = Math.max(totalUnread - postsToMark.length, 0);
     updateUnreadCount(totalUnread);
     renderVisiblePosts();
+    window.scrollTo(0, 0);
   });
 }
 
