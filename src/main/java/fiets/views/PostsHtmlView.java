@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 public class PostsHtmlView implements View<String> {
 
   private static final Logger log = LogManager.getLogger();
+  private static final int DEFAULT_PAGE_SIZE = 20;
 
   private final List<Post> posts;
   private final int unreadCount;
@@ -34,7 +35,9 @@ public class PostsHtmlView implements View<String> {
   @Override public String getContent() {
     StringBuilder sb = new StringBuilder()
       .append(header())
-      .append("<ul class='list-group'>");
+      .append(String.format(
+        "<ul class='list-group posts-list' data-page-size='%d'>",
+        DEFAULT_PAGE_SIZE));
     for (Post p : posts) {
       try {
         sb.append(post(p));
@@ -59,7 +62,7 @@ public class PostsHtmlView implements View<String> {
   private String post(Post p) {
     PostDisplay display = new PostDisplay(p);
     return String.format(
-      "<li class='list-group-item post %s'>"
+      "<li class='list-group-item post %s' data-post-id='%d' data-read='%s'>"
       + "<div class='post-meta'>"
       + "<small class='post-date'>%s</small>"
       + "<span class='meta-separator'>|</span>"
@@ -74,6 +77,8 @@ public class PostsHtmlView implements View<String> {
       + "<h3 title='%s'><a href='%s' target='_blank'>%s</a></h3>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
+      p.getId(),
+      p.isRead(),
       display.getDate(), display.getFeedTitle(), display.getMobileFeedTitle(),
       display.getTitle(), p.getLocation(),
       display.getShortenedTitle(),
@@ -109,30 +114,27 @@ public class PostsHtmlView implements View<String> {
     if (unread == 0) {
       return "";
     } else {
-      return String.format("<a href='%s'><small>Mark %d of %d read</small></a>",
-        markReadUrl(), unread, unreadCount);
+      List<Post> postsToMark = unreadPostsToShow();
+      return String.format(
+        "<a class='mark-read-action' data-total-unread='%d' href='%s'>"
+        + "<small>Mark %d of %d read</small></a>",
+        unreadCount, markReadUrl(postsToMark), postsToMark.size(), unreadCount);
     }
   }
 
   private int unreadCount() {
-    int unread = 0;
-    for (Post p : posts) {
-      if (!p.isRead()) {
-        unread++;
-      }
-    }
-    return unread;
+    return (int) posts.stream().filter(p -> !p.isRead()).count();
   }
 
-  private String markReadUrl() {
-    StringBuilder ids = new StringBuilder(posts.size() * 10);
-    for (Post p : posts) {
+  private String markReadUrl(List<Post> postsToMark) {
+    StringBuilder ids = new StringBuilder(postsToMark.size() * 10);
+    for (Post p : postsToMark) {
       if (ids.length() > 0) {
         ids.append(',');
       }
       ids.append(p.getId());
     }
-    return "/markread?posts=" + ids.toString();
+    return "/markread?posts=" + ids;
   }
 
   private String bookmarkUrl(long id) {
@@ -162,13 +164,24 @@ public class PostsHtmlView implements View<String> {
   private String header() {
     if (unreadCount > 0) {
       return Pages.headerTemplate(pageName, String.format(
-        "%d of %d posts - Fiets", posts.size(), unreadCount),
+        "%d of %d posts - Fiets", displayedPostsCount(), unreadCount),
         unreadCount, bookmarked.size());
     } else {
       return Pages.headerTemplate(pageName,
-        String.format("%d posts - Fiets", posts.size()),
+        String.format("%d posts - Fiets", displayedPostsCount()),
         unreadCount, bookmarked.size());
     }
+  }
+
+  private int displayedPostsCount() {
+    return Math.min(posts.size(), DEFAULT_PAGE_SIZE);
+  }
+
+  private List<Post> unreadPostsToShow() {
+    return posts.stream()
+      .filter(p -> !p.isRead())
+      .limit(DEFAULT_PAGE_SIZE)
+      .toList();
   }
 
 }
