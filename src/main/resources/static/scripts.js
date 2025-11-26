@@ -9,20 +9,32 @@ function getEditFilterModal() {
   return bootstrap.Modal.getOrCreateInstance(modalElement);
 }
 
-function updateUnreadCount(unread) {
-  var $unread = $('.unread-count');
-  if ($unread.length === 0) {
-    return;
-  }
-  $unread.text(unread);
-  var $doc = $(document);
-  var title = $doc.attr("title");
-  if (title.indexOf(' of ') > 0) {
-    title = title.replace(/of \d+ posts/, 'of ' + unread + ' posts');
+function updateTitleCounts(visibleCount, unread) {
+  var current = document.title || '';
+  var suffixIndex = current.indexOf(' - ');
+  var suffix = suffixIndex >= 0 ? current.substring(suffixIndex) : '';
+  var prefix;
+
+  if (unread > 0) {
+    prefix = visibleCount + ' of ' + unread + ' posts';
   } else {
-    title = title.replace(/\d+ posts/, unread + ' posts');
+    prefix = visibleCount + ' posts';
   }
-  $doc.attr("title", title);
+
+  document.title = suffix ? prefix + suffix : prefix;
+}
+
+function updateUnreadCount(unread, visibleCount) {
+  var $unread = $('.unread-count');
+  if ($unread.length > 0) {
+    $unread.text(unread);
+  }
+
+  var visible = typeof visibleCount === 'number' && !isNaN(visibleCount)
+    ? visibleCount
+    : $('.posts-list .post').length;
+
+  updateTitleCounts(visible, unread);
 }
 
 function initPostPager() {
@@ -71,6 +83,7 @@ function initPostPager() {
       $postList.append(post);
     });
     updateMarkReadLink();
+    updateUnreadCount(totalUnread, visiblePosts().length);
   }
 
   renderVisiblePosts();
@@ -97,7 +110,6 @@ function initPostPager() {
 
     postsCache = postsCache.slice(postsToMark.length);
     totalUnread = Math.max(totalUnread - postsToMark.length, 0);
-    updateUnreadCount(totalUnread);
     renderVisiblePosts();
     window.scrollTo(0, 0);
   });
