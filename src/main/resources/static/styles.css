@@ -7,9 +7,7 @@ body {
   margin: 0;
   padding-bottom: 80px;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-  background: radial-gradient(circle at 20% 20%, rgba(148, 163, 184, 0.18), transparent 32%),
-              radial-gradient(circle at 80% 12%, rgba(226, 232, 240, 0.18), transparent 30%),
-              linear-gradient(180deg, #f9fafb 0%, #eef1f5 46%, #f9fafb 100%);
+  background: #f3f4f6;
   color: #1f2937;
 }
 
@@ -23,9 +21,8 @@ a { color: inherit; }
   margin-top: 22px;
   padding: 12px 18px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: #ffffff;
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.08);
   border: 1px solid rgba(31, 41, 55, 0.08);
 }
 
@@ -55,9 +52,8 @@ a { color: inherit; }
   width: 100%;
   height: 60px;
   line-height: 60px;
-  background: rgba(255, 255, 255, 0.94);
+  background: #ffffff;
   border-top: 1px solid rgba(31, 41, 55, 0.08);
-  backdrop-filter: blur(8px);
   z-index: 20;
   color: #475569;
 }
@@ -83,15 +79,15 @@ a { color: inherit; }
 .list-group-item {
   border: none;
   border-radius: 14px !important;
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   color: #1f2937;
-  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.08);
   transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .list-group-item:hover {
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.11);
+  background: #f8fafc;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.1);
 }
 
 .feed-actions, .filter-actions {
@@ -159,8 +155,8 @@ a { color: inherit; }
 
 .list-group-item.post.bookmarked {
   border: 1px solid rgba(51, 65, 85, 0.26);
-  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
-  background: linear-gradient(135deg, rgba(243, 244, 246, 0.85), rgba(255, 255, 255, 0.94));
+  box-shadow: 0 6px 16px rgba(17, 24, 39, 0.12);
+  background: #f8fafc;
   z-index: 1;
 }
 
