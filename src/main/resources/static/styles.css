@@ -86,11 +86,10 @@ a { color: inherit; }
   background: rgba(255, 255, 255, 0.96);
   color: #1f2937;
   box-shadow: 0 10px 25px rgba(17, 24, 39, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .list-group-item:hover {
-  transform: translateY(-2px);
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(17, 24, 39, 0.11);
 }
@@ -113,6 +112,15 @@ a { color: inherit; }
   font-size: 1.15rem;
   color: #0f172a;
   margin-top: 8px;
+}
+
+.post h3 a {
+  text-decoration: none;
+}
+
+.post h3 a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 .post small {
