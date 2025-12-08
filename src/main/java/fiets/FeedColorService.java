@@ -5,10 +5,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -16,9 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fiets.db.FeedDao;
+import fiets.db.PostDao;
 import fiets.model.Feed;
 import fiets.model.FeedMetadata;
-import fiets.sources.HttpFeedSource;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 
@@ -26,9 +25,11 @@ public class FeedColorService {
 
   private static final Logger log = LogManager.getLogger();
   private final FeedDao feedDao;
+  private final PostDao postDao;
 
-  public FeedColorService(FeedDao theFeedDao) {
+  public FeedColorService(FeedDao theFeedDao, PostDao thePostDao) {
     feedDao = theFeedDao;
+    postDao = thePostDao;
   }
 
   public String ensureColor(Feed feed) {
@@ -54,11 +55,14 @@ public class FeedColorService {
     if (faviconColor != null) {
       return faviconColor;
     }
-    String homepageColor = readHomepageColor(baseUri);
-    if (homepageColor != null) {
-      return homepageColor;
+    URI postUri = firstPostBaseUri(feed.getId());
+    if (postUri != null) {
+      String postFaviconColor = readFaviconColor(postUri);
+      if (postFaviconColor != null) {
+        return postFaviconColor;
+      }
     }
-    return hashToColor(baseUri.toString());
+    return null;
   }
 
   private static URI baseUri(String location) {
@@ -104,82 +108,49 @@ public class FeedColorService {
       if (img == null) {
         return null;
       }
-      long r = 0;
-      long g = 0;
-      long b = 0;
-      long count = 0;
-      for (int x = 0; x < img.getWidth(); x++) {
-        for (int y = 0; y < img.getHeight(); y++) {
-          int argb = img.getRGB(x, y);
-          int alpha = (argb >> 24) & 0xff;
-          if (alpha == 0) {
-            continue;
-          }
-          Color c = new Color(argb, true);
-          r += c.getRed();
-          g += c.getGreen();
-          b += c.getBlue();
-          count++;
+      return dominantColor(img);
+    } catch (Exception e) {
+      log.debug("Could not determine favicon color: {}", e.toString());
+      return null;
+    }
+  }
+
+  private String dominantColor(BufferedImage img) {
+    Map<Integer, Integer> histogram = new HashMap<>();
+    int width = img.getWidth();
+    int height = img.getHeight();
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        int argb = img.getRGB(x, y);
+        int alpha = (argb >> 24) & 0xff;
+        if (alpha == 0) {
+          continue;
         }
+        histogram.merge(argb & 0x00ffffff, 1, Integer::sum);
       }
-      if (count == 0) {
+    }
+    if (histogram.isEmpty()) {
+      return null;
+    }
+    int dominant = histogram.entrySet().stream()
+      .max(Map.Entry.comparingByValue())
+      .map(Map.Entry::getKey)
+      .orElse(0);
+    Color color = new Color(dominant);
+    return FeedMetadata.normalizeColor(String.format("#%02x%02x%02x",
+      color.getRed(), color.getGreen(), color.getBlue()));
+  }
+
+  private URI firstPostBaseUri(long feedId) {
+    try {
+      String postLocation = postDao.getMostRecentPostLocation(feedId);
+      if (postLocation == null) {
         return null;
       }
-      return FeedMetadata.normalizeColor(String.format("#%02x%02x%02x",
-        r / count, g / count, b / count));
-    } catch (Exception e) {
-      log.debug("Could not average favicon color: {}", e.toString());
+      return baseUri(postLocation);
+    } catch (SQLException e) {
+      log.debug("Could not load most recent post for feed {}: {}", feedId, e.toString());
       return null;
     }
-  }
-
-  private String readHomepageColor(URI baseUri) {
-    try {
-      String html = HttpFeedSource.readUrlContent(baseUri.toString());
-      return hashToColor(html);
-    } catch (RuntimeException e) {
-      log.debug("Could not read homepage for {}: {}", baseUri, e.toString());
-      return null;
-    }
-  }
-
-  private String hashToColor(String text) {
-    if (text == null || text.isEmpty()) {
-      return null;
-    }
-    try {
-      MessageDigest digest = MessageDigest.getInstance("MD5");
-      byte[] hash = digest.digest(text.getBytes(StandardCharsets.UTF_8));
-      int hue = ((hash[0] & 0xff) << 8 | (hash[1] & 0xff)) % 360;
-      float saturation = 0.45f + ((hash[2] & 0xff) / 255f) * 0.25f;
-      float lightness = 0.78f;
-      return FeedMetadata.normalizeColor(hslToHex(hue, saturation, lightness));
-    } catch (NoSuchAlgorithmException e) {
-      return null;
-    }
-  }
-
-  private static String hslToHex(float h, float s, float l) {
-    float c = (1 - Math.abs(2 * l - 1)) * s;
-    float x = c * (1 - Math.abs((h / 60f) % 2 - 1));
-    float m = l - c / 2;
-    float rPrime = 0, gPrime = 0, bPrime = 0;
-    if (h < 60) {
-      rPrime = c; gPrime = x; bPrime = 0;
-    } else if (h < 120) {
-      rPrime = x; gPrime = c; bPrime = 0;
-    } else if (h < 180) {
-      rPrime = 0; gPrime = c; bPrime = x;
-    } else if (h < 240) {
-      rPrime = 0; gPrime = x; bPrime = c;
-    } else if (h < 300) {
-      rPrime = x; gPrime = 0; bPrime = c;
-    } else {
-      rPrime = c; gPrime = 0; bPrime = x;
-    }
-    int r = Math.round((rPrime + m) * 255);
-    int g = Math.round((gPrime + m) * 255);
-    int b = Math.round((bPrime + m) * 255);
-    return String.format("#%02x%02x%02x", r, g, b);
   }
 }

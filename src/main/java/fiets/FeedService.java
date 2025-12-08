@@ -32,7 +32,7 @@ public class FeedService {
     fed = new FeedDao(theDb);
     fid = new FilterDao(theDb, fed);
     pd = new PostDao(theDb);
-    colorService = new FeedColorService(fed);
+    colorService = new FeedColorService(fed, pd);
   }
 
   public List<Feed> addFeeds(List<String> urls)
@@ -230,6 +230,14 @@ public class FeedService {
   
   public void deleteFilter(long filterId) throws SQLException {
     fid.deleteFilter(filterId);
+  }
+
+  public void resetFeedColors() {
+    try {
+      fed.clearAllFeedColors();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

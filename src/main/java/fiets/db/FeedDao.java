@@ -245,4 +245,18 @@ public class FeedDao {
       ps.executeUpdate();
     }
   }
+
+  public void clearAllFeedColors() throws SQLException {
+    List<Feed> feeds = getAllFeeds();
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      "UPDATE feed SET lastStatus=? WHERE id=?")) {
+      for (Feed feed : feeds) {
+        ps.setString(1, FeedMetadata.stripColor(feed.getLastStatus()));
+        ps.setLong(2, feed.getId());
+        ps.addBatch();
+      }
+      ps.executeBatch();
+    }
+  }
 }
