@@ -106,6 +106,9 @@ public class FeedColorService {
     try {
       BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
       if (img == null) {
+        img = readPngFromIco(bytes);
+      }
+      if (img == null) {
         return null;
       }
       return dominantColor(img);
@@ -113,6 +116,59 @@ public class FeedColorService {
       log.debug("Could not determine favicon color: {}", e.toString());
       return null;
     }
+  }
+
+  private BufferedImage readPngFromIco(byte[] bytes) {
+    if (bytes.length < 6) {
+      return null;
+    }
+    int count = Byte.toUnsignedInt(bytes[4]) | (Byte.toUnsignedInt(bytes[5]) << 8);
+    int headerSize = 6 + (count * 16);
+    if (headerSize > bytes.length) {
+      return null;
+    }
+    BufferedImage best = null;
+    for (int i = 0; i < count; i++) {
+      int entryOffset = 6 + (i * 16);
+      int imageSize = readInt(bytes, entryOffset + 8);
+      int imageOffset = readInt(bytes, entryOffset + 12);
+      if (imageOffset < 0 || imageSize <= 0 || imageOffset + imageSize > bytes.length) {
+        continue;
+      }
+      if (!isPng(bytes, imageOffset)) {
+        continue;
+      }
+      try {
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes, imageOffset, imageSize));
+        if (img != null && (best == null || (img.getWidth() * img.getHeight()) > (best.getWidth() * best.getHeight()))) {
+          best = img;
+        }
+      } catch (Exception e) {
+        log.debug("Could not read PNG frame from ICO: {}", e.toString());
+      }
+    }
+    return best;
+  }
+
+  private static int readInt(byte[] bytes, int offset) {
+    return Byte.toUnsignedInt(bytes[offset])
+      | (Byte.toUnsignedInt(bytes[offset + 1]) << 8)
+      | (Byte.toUnsignedInt(bytes[offset + 2]) << 16)
+      | (Byte.toUnsignedInt(bytes[offset + 3]) << 24);
+  }
+
+  private static boolean isPng(byte[] bytes, int offset) {
+    if (offset + 8 > bytes.length) {
+      return false;
+    }
+    return bytes[offset] == (byte) 0x89
+      && bytes[offset + 1] == 0x50
+      && bytes[offset + 2] == 0x4e
+      && bytes[offset + 3] == 0x47
+      && bytes[offset + 4] == 0x0d
+      && bytes[offset + 5] == 0x0a
+      && bytes[offset + 6] == 0x1a
+      && bytes[offset + 7] == 0x0a;
   }
 
   private String dominantColor(BufferedImage img) {
