@@ -196,6 +196,21 @@ public class FeedDao {
     return feeds;
   }
 
+  public List<String> getAllFeedColors() throws SQLException {
+    List<String> colors = new ArrayList<>();
+    try (PreparedStatement ps = db.getConnection().prepareStatement(
+      "SELECT lastStatus FROM feed")) {
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        String color = FeedMetadata.extractColor(rs.getString(1));
+        if (color != null) {
+          colors.add(color);
+        }
+      }
+    }
+    return colors;
+  }
+
   private static Feed parseFeedResultSet(ResultSet rs) throws SQLException {
     return parseFeedResultSet(rs, new int[] {0});
   }

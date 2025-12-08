@@ -6,7 +6,9 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -37,7 +39,7 @@ public class FeedColorService {
     if (color != null) {
       return color;
     }
-    color = FeedMetadata.ensureColorOrDefault(determineColor(feed));
+    color = FeedMetadata.ensureColorOrDefault(distinctColor(determineColor(feed)));
     try {
       feedDao.storeFeedColor(feed, color);
     } catch (SQLException e) {
@@ -195,6 +197,82 @@ public class FeedColorService {
     Color color = new Color(dominant);
     return FeedMetadata.normalizeColor(String.format("#%02x%02x%02x",
       color.getRed(), color.getGreen(), color.getBlue()));
+  }
+
+  private String distinctColor(String proposed) {
+    String normalized = FeedMetadata.normalizeColor(proposed);
+    if (normalized == null) {
+      return proposed;
+    }
+    List<Double> existingHues = existingHues();
+    if (existingHues.isEmpty()) {
+      return normalized;
+    }
+    float[] hsb = Color.RGBtoHSB(
+      Integer.parseInt(normalized.substring(1, 3), 16),
+      Integer.parseInt(normalized.substring(3, 5), 16),
+      Integer.parseInt(normalized.substring(5, 7), 16),
+      null);
+    double hue = hsb[0] * 360.0d;
+    double minDistance = minHueDistance(hue, existingHues);
+    if (minDistance >= 18d) {
+      return normalized;
+    }
+    double bestHue = hue;
+    double widestGap = -1d;
+    List<Double> sorted = new ArrayList<>(existingHues);
+    sorted.sort(Double::compareTo);
+    for (int i = 0; i < sorted.size(); i++) {
+      double start = sorted.get(i);
+      double end = sorted.get((i + 1) % sorted.size());
+      double gap = end - start;
+      if (gap < 0) {
+        gap += 360d;
+      }
+      if (gap > widestGap) {
+        widestGap = gap;
+        bestHue = start + gap / 2d;
+      }
+    }
+    while (bestHue >= 360d) {
+      bestHue -= 360d;
+    }
+    int rgb = Color.HSBtoRGB((float) (bestHue / 360d), hsb[1], hsb[2]);
+    Color color = new Color(rgb);
+    return FeedMetadata.normalizeColor(String.format("#%02x%02x%02x",
+      color.getRed(), color.getGreen(), color.getBlue()));
+  }
+
+  private List<Double> existingHues() {
+    try {
+      List<String> colors = feedDao.getAllFeedColors();
+      List<Double> hues = new ArrayList<>();
+      for (String color : colors) {
+        if (color == null) {
+          continue;
+        }
+        float[] hsb = Color.RGBtoHSB(
+          Integer.parseInt(color.substring(1, 3), 16),
+          Integer.parseInt(color.substring(3, 5), 16),
+          Integer.parseInt(color.substring(5, 7), 16),
+          null);
+        hues.add(hsb[0] * 360.0d);
+      }
+      return hues;
+    } catch (SQLException e) {
+      log.debug("Could not load stored feed colors: {}", e.toString());
+      return List.of();
+    }
+  }
+
+  private static double minHueDistance(double hue, List<Double> existingHues) {
+    double minDistance = 360d;
+    for (double existing : existingHues) {
+      double direct = Math.abs(hue - existing);
+      double wrapped = 360d - direct;
+      minDistance = Math.min(minDistance, Math.min(direct, wrapped));
+    }
+    return minDistance;
   }
 
   private URI firstPostBaseUri(long feedId) {
