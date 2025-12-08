@@ -61,6 +61,10 @@ public class PostsHtmlView implements View<String> {
 
   private String post(Post p) {
     PostDisplay display = new PostDisplay(p);
+    String bgColor = display.getFeedColor();
+    String textColor = display.getReadableTextColor();
+    String titleStyle = String.format(" style='background:%s;color:%s;'",
+      bgColor, textColor);
     return String.format(
       "<li class='list-group-item post %s' data-post-id='%d' data-read='%s'>"
       + "<div class='post-meta'>"
@@ -74,13 +78,13 @@ public class PostsHtmlView implements View<String> {
       + removeBookmarkLink(p)
       + "</span>"
       + "</div>"
-      + "<h3 title='%s'><a href='%s' target='_blank'>%s</a></h3>"
+      + "<h3 class='post-title' title='%s'%s><a href='%s' target='_blank'>%s</a></h3>"
       + "<div>%s</div></li>",
       isBookmarked(p) ? "bookmarked" : "",
       p.getId(),
       p.isRead(),
       display.getDate(), display.getFeedTitle(), display.getMobileFeedTitle(),
-      display.getTitle(), p.getLocation(),
+      display.getTitle(), titleStyle, p.getLocation(),
       display.getShortenedTitle(),
       display.getShortenedSnippet());
   }

@@ -193,6 +193,21 @@ public class PostDao {
     }
   }
 
+  public String getMostRecentPostLocation(long feedId) throws SQLException {
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      selectPost("INNER JOIN postfeed ON post.id=postfeed.post "
+        + "WHERE postfeed.feed=? ORDER BY post.date DESC, post.id DESC LIMIT 1"))) {
+      ps.setLong(1, feedId);
+      try (ResultSet rs = ps.executeQuery()) {
+        if (!rs.next()) {
+          return null;
+        }
+        return rs.getString("location");
+      }
+    }
+  }
+
   private int getCount(String appendix) throws SQLException {
     Connection conn = db.getConnection();
     try (PreparedStatement ps = conn.prepareStatement(

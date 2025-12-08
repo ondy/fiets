@@ -158,9 +158,15 @@ public enum PathMatch {
       );
     }
   },
+  resetColors("reset-colors") {
+    @Override public View<String> serve(SessionDecorator sd, FeedService fs) {
+      fs.resetFeedColors();
+      return new JsonView(Server.jsonOk());
+    }
+  },
   staticFile("static") {
     @Override public View<InputStream> serve(
-      SessionDecorator sd, FeedService fs) 
+      SessionDecorator sd, FeedService fs)
       throws FileNotFoundException {
       return new FileView(sd);
     }

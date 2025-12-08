@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.Jsoup;
 
 import fiets.model.Post;
+import fiets.model.FeedMetadata;
 
 public class PostDisplay {
   private static final Logger log = LogManager.getLogger();
@@ -77,6 +78,15 @@ public class PostDisplay {
 
   public String getLocation() {
     return cleanup(post.getLocation());
+  }
+
+  public String getFeedColor() {
+    return FeedMetadata.ensureColorOrDefault(
+      FeedMetadata.extractColor(post.getFeed()));
+  }
+
+  public String getReadableTextColor() {
+    return FeedMetadata.readableTextColor(getFeedColor());
   }
 
   private static String shorten(String text, int maxLength) {

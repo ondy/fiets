@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
+import fiets.model.FeedMetadata;
 
 /**
  * DAO for the feeds table.
@@ -71,7 +72,8 @@ public class FeedDao {
       "UPDATE feed SET lastAccess=?,lastStatus=? WHERE id=?")) {
       int i = 0;
       ps.setTimestamp(++i, Database.toTimestamp(new Date()));
-      ps.setString(++i, status);
+      ps.setString(++i, FeedMetadata.mergeStatusAndColor(status,
+        feed.getLastStatus(), null));
       ps.setLong(++i, feed.getId());
       ps.executeUpdate();
     }
@@ -132,7 +134,8 @@ public class FeedDao {
       ps.setString(1, feed.getLocation());
       ps.setString(2, feed.getTitle());
       ps.setTimestamp(3, Database.toTimestamp(feed.getLastAccess()));
-      ps.setString(4, feed.getLastStatus());
+      ps.setString(4, FeedMetadata.mergeStatusAndColor(
+        feed.getLastStatus(), feed.getLastStatus(), null));
       ps.executeUpdate();
       feed = new Feed(Database.getGeneratedKey(ps),
         feed.getLocation(), feed.getTitle(), feed.getLastAccess(),
@@ -193,6 +196,21 @@ public class FeedDao {
     return feeds;
   }
 
+  public List<String> getAllFeedColors() throws SQLException {
+    List<String> colors = new ArrayList<>();
+    try (PreparedStatement ps = db.getConnection().prepareStatement(
+      "SELECT lastStatus FROM feed")) {
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        String color = FeedMetadata.extractColor(rs.getString(1));
+        if (color != null) {
+          colors.add(color);
+        }
+      }
+    }
+    return colors;
+  }
+
   private static Feed parseFeedResultSet(ResultSet rs) throws SQLException {
     return parseFeedResultSet(rs, new int[] {0});
   }
@@ -230,5 +248,30 @@ public class FeedDao {
       ps.executeUpdate();
     }
     log.debug("Deleted feed {} with ID {}.", f.getLocation(), id);
+  }
+
+  public void storeFeedColor(Feed feed, String color) throws SQLException {
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      "UPDATE feed SET lastStatus=? WHERE id=?")) {
+      ps.setString(1, FeedMetadata.mergeStatusAndColor(null,
+        feed.getLastStatus(), color));
+      ps.setLong(2, feed.getId());
+      ps.executeUpdate();
+    }
+  }
+
+  public void clearAllFeedColors() throws SQLException {
+    List<Feed> feeds = getAllFeeds();
+    Connection conn = db.getConnection();
+    try (PreparedStatement ps = conn.prepareStatement(
+      "UPDATE feed SET lastStatus=? WHERE id=?")) {
+      for (Feed feed : feeds) {
+        ps.setString(1, FeedMetadata.stripColor(feed.getLastStatus()));
+        ps.setLong(2, feed.getId());
+        ps.addBatch();
+      }
+      ps.executeBatch();
+    }
   }
 }
