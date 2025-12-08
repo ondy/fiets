@@ -2,6 +2,7 @@ package fiets.views;
 
 import fiets.model.Feed;
 import fiets.model.FeedInfo;
+import fiets.model.FeedMetadata;
 import fiets.views.Pages.Name;
 
 import java.io.UnsupportedEncodingException;
@@ -60,7 +61,8 @@ public class FeedsHtmlView implements View<String> {
       + "<span class='feed-actions'><a href='%s' class='btn btn-sm btn-light update-feed'>Update</a>"
       + "<a href='%s' class='btn btn-sm btn-danger delete-feed'>Delete</a></span>",
       f.getLocation(), f.getTitle(), fi.getNumUnread(), fi.getNumRead(),
-      PostDisplay.fmtDate(fi.getMostRecentPost()), f.getLastStatus(),
+      PostDisplay.fmtDate(fi.getMostRecentPost()),
+      FeedMetadata.stripColor(f.getLastStatus()),
       updateFeedLink(f), deleteFeedLink(f));
   }
 

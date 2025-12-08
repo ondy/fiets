@@ -3,6 +3,7 @@ package fiets;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,12 +25,14 @@ public class FeedService {
   private final FeedDao fed;
   private final FilterDao fid;
   private final PostDao pd;
+  private final FeedColorService colorService;
 
   public FeedService(Database theDb)
           throws SQLException {
     fed = new FeedDao(theDb);
     fid = new FilterDao(theDb, fed);
     pd = new PostDao(theDb);
+    colorService = new FeedColorService(fed);
   }
 
   public List<Feed> addFeeds(List<String> urls)
@@ -69,6 +72,7 @@ public class FeedService {
     Filterer ff = new Filterer(allFilters);
     for (Feed feed : feeds) {
       try {
+        colorService.ensureColor(feed);
         List<Post> posts = Process.parsePosts(feed);
         posts = posts.stream()
           .map(p -> {
@@ -97,11 +101,15 @@ public class FeedService {
   }
 
   public List<Post> getUnreadPosts(int num) throws SQLException {
-    return pd.getUnreadPosts(num);
+    List<Post> posts = pd.getUnreadPosts(num);
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public List<Post> getReadPosts(int num) throws SQLException {
-    return pd.getReadPosts(num);
+    List<Post> posts = pd.getReadPosts(num);
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public void markPostsRead(List<Long> postIds) throws SQLException {
@@ -109,7 +117,9 @@ public class FeedService {
   }
 
   public List<Post> getBookmarkedPosts() throws SQLException {
-    return pd.getBookmarkedPosts();
+    List<Post> posts = pd.getBookmarkedPosts();
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public void bookmarkPost(long postId) throws SQLException {
@@ -170,15 +180,21 @@ public class FeedService {
   }
 
   public List<Post> postsAfter(long sinceId) throws SQLException {
-    return pd.postsAfter(sinceId);
+    List<Post> posts = pd.postsAfter(sinceId);
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public List<Post> postsBefore(long maxId) throws SQLException {
-    return pd.postsBefore(maxId);
+    List<Post> posts = pd.postsBefore(maxId);
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public List<Post> posts(List<Long> withIds) throws SQLException {
-    return pd.posts(withIds);
+    List<Post> posts = pd.posts(withIds);
+    ensureFeedColors(posts);
+    return posts;
   }
 
   public void markPostRead(long id) throws SQLException {
@@ -187,6 +203,15 @@ public class FeedService {
 
   public void markPostUnread(long id) throws SQLException {
     pd.markPostUnread(id);
+  }
+
+  private void ensureFeedColors(List<Post> posts) {
+    Set<Long> seen = new HashSet<>();
+    posts.stream()
+      .map(Post::getFeed)
+      .filter(f -> f != null)
+      .filter(f -> seen.add(f.getId()))
+      .forEach(colorService::ensureColor);
   }
 
   public void markAllRead(Date before) throws SQLException {
